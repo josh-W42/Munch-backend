@@ -15,19 +15,16 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  favorites: [{type: mongoose.Schema.Types.RestarauntId, ref: 'Restaraunt'}],
-  key: String (hashed),
   password: {
     type: String,
     minLength: 8,
     required: true,
   },
-  followers: [{type: mongoose.Schema.Types.userId, ref: 'followers'}], // idk if this works
-  following: [{type: mongoose.Schema.Types.usertId, ref: 'following'}], // idk if this works
-  payments: {
-    type:String // unknown for now
-  }, 
-  location: { type:String },
+  favorites: [{type: mongoose.Schema.Types.restarauntId, ref: 'Restaraunt'}],
+  followers: [{type: mongoose.Schema.Types.userId, ref: 'Users'}], // idk if this works
+  following: [{type: mongoose.Schema.Types.usertId, ref: 'Users'}], // idk if this works
+  payments: null, 
+  location: null,
 },
   { timestamps: true }
 )
