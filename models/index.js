@@ -4,10 +4,10 @@ const mongoose = require('mongoose');
 // Better Practice to hid the mongo url
 const { MONGO_URL } = process.env;
 const configOptions = {
-    useNewUrlParser: true,
-    useCreateIndex: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false,
+  useNewUrlParser: true,
+  useCreateIndex: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false,
 };
 
 mongoose.connect(MONGO_URL, configOptions)

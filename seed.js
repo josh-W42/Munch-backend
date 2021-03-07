@@ -14,9 +14,9 @@ const addManyExamples = async () => {
 
 const addOneExample = async () => {
   const savedOneExample = await db.Example.create(oneExample);
-  console.log('=======> Saved One Example.');
+  console.log("=======> Saved One Example.");
   console.log(savedOneExample);
-}
+};
 
 // run the functions
 addManyExamples();

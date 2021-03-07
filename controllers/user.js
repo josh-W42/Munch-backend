@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = process.env;
 
 // Data base
-const db = require('../models');
+const db = require("../models");
 
 // basic test 
 const test = async (req, res) => {

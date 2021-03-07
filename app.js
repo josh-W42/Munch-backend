@@ -1,11 +1,11 @@
 // Imports
-require('dotenv').config()
-const express = require('express');
-const routes = require('./routes');
-const cors = require('cors');
-const passport = require('passport');
-const path = require('path');
-require('./config/passport')(passport);
+require("dotenv").config();
+const express = require("express");
+const routes = require("./routes");
+const cors = require("cors");
+const passport = require("passport");
+const path = require("path");
+require("./config/passport")(passport);
 
 // App Set up
 const app = express();
@@ -16,17 +16,24 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json()); // JSON parsing
 app.use(cors()); // allow all CORS requests
 app.use(passport.initialize());
-app.use(express.static(path.resolve(__dirname, 'clients', 'build')));
+app.use(express.static(path.resolve(__dirname, "clients", "build")));
 
 // API Routes
-app.get('/api/', (req, res) => {
-  res.json({ name: 'MERN Auth API', greeting: 'Welcome to the our API', author: 'YOU', message: "Smile, you are being watched by the Backend Engineering Team" });
+app.get("/api/", (req, res) => {
+  res.json({
+    name: "MERN Auth API",
+    greeting: "Welcome to the our API",
+    author: "YOU",
+    message: "Smile, you are being watched by the Backend Engineering Team",
+  });
 });
 
-app.use('/api/examples', routes.example);
-app.use('/api/users', routes.user);
+app.use("/api/examples", routes.example);
+app.use("/api/users", routes.user);
 
 // Server
-const server = app.listen(PORT, () => console.log(`Server is running on PORT: ${PORT}`));
+const server = app.listen(PORT, () =>
+  console.log(`Server is running on PORT: ${PORT}`)
+);
 
 module.exports = server;
