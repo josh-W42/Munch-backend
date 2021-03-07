@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-const menuSchema = new mongoose.Schema({
+const productSchema = new mongoose.Schema({
   name: String,
   description: String,
   imgUrl: String,
@@ -30,11 +30,11 @@ const restarauntSchema = new mongoose.Schema(
       type: String,
     },
     // embedded
-    menu: [menuSchema],
+    menu: [productSchema],
+    // reference
+    category: [{type: mongoose.Schema.Types.categoryId, ref: 'Category'}]
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 const Restaraunt = mongoose.model("Restaraunt", restarauntSchema);
