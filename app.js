@@ -30,6 +30,7 @@ app.get("/api/", (req, res) => {
 
 app.use("/api/examples", routes.example);
 app.use("/api/users", routes.user);
+app.use("/api/restaraunts", routes.restaraunt);
 
 // Server
 const server = app.listen(PORT, () =>
