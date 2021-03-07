@@ -5,8 +5,8 @@ const index = (req, res) => {
     console.log('=====> Inside GET /examples');
 
     db.Example.find({}, (err, foundExamples) => {
-        if (err) console.log('Error in example#index:', err);
-        res.json(foundExamples);
+      if (err) console.log("Error in example#index:", err);
+      res.json(foundExamples);
     });
 }
 
