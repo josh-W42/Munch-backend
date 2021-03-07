@@ -4,6 +4,7 @@ const express = require('express');
 const routes = require('./routes');
 const cors = require('cors');
 const passport = require('passport');
+const path = require('path');
 require('./config/passport')(passport);
 
 // App Set up
@@ -15,6 +16,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json()); // JSON parsing
 app.use(cors()); // allow all CORS requests
 app.use(passport.initialize());
+app.use(express.static(path.resolve(__dirname, 'clients', 'build')));
 
 // API Routes
 app.get('/api/', (req, res) => {
