@@ -25,9 +25,9 @@ const userSchema = new mongoose.Schema({
     minLength: 8,
     required: true,
   },
-  favorites: [{type: mongoose.Schema.Types.restarauntId, ref: 'Restaraunt'}],
-  followers: [{type: mongoose.Schema.Types.userId, ref: 'User'}], // idk if this works
-  following: [{type: mongoose.Schema.Types.usertId, ref: 'User'}], // idk if this works
+  favorites: [{type: mongoose.Schema.Types.ObjectId, ref: 'Restaraunt'}],
+  followers: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}], // idk if this works
+  following: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}], // idk if this works
   payments: null, 
   location: null,
 },
