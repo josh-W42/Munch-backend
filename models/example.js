@@ -6,6 +6,6 @@ const exampleSchema = new Schema({
     completed: Boolean,
 });
 
-const Example = mongoose.model("Example", exampleSchema);
+const Example = mongoose.model('Example', exampleSchema);
 
 module.exports = Example;
