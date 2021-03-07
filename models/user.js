@@ -26,8 +26,8 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   favorites: [{type: mongoose.Schema.Types.restarauntId, ref: 'Restaraunt'}],
-  followers: [{type: mongoose.Schema.Types.userId, ref: 'Users'}], // idk if this works
-  following: [{type: mongoose.Schema.Types.usertId, ref: 'Users'}], // idk if this works
+  followers: [{type: mongoose.Schema.Types.userId, ref: 'User'}], // idk if this works
+  following: [{type: mongoose.Schema.Types.usertId, ref: 'User'}], // idk if this works
   payments: null, 
   location: null,
 },
