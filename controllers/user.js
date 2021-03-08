@@ -53,12 +53,12 @@ const register = async (req, res) => {
 
         newUser.password = hash;
         const createdUser = await newUser.save();
-        res.status(201).json({ user: createdUser, message: 'User Created' });
+        res.status(201).json({ success: true, user: createdUser, message: 'User Created' });
       });
     });
   } catch (error) {
     console.error(error);
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ success: false, message: error.message });
   }
 }
 
@@ -79,7 +79,7 @@ const login = async (req, res) => {
     const payload = {
       id: findUser.id,
       email: findUser.email,
-      name: findUser.name
+      userName: findUser.userName
     }
 
     /* 
@@ -107,7 +107,7 @@ const login = async (req, res) => {
     
   } catch (error) {
     console.error(error);
-    res.status(400).json({ message: error.message});
+    res.status(400).json({ success: false, message: error.message});
   }
 }
 
@@ -120,11 +120,11 @@ const profile = async(req, res) => {
     // If it doesn't exist, throw an error
     if (!user) throw new Error("User Does Not Exist.");
     // Remove password.
-    user.password = ''
-    res.json({ user });
+    user.password = '';
+    res.json({ success: true, user });
   } catch (error) {
     console.error(error);
-    res.status(400).json({ message: 'User Does Not Exist' });
+    res.status(400).json({ success: false, message: 'User Does Not Exist' });
   }
 }
 
