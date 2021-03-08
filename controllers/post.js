@@ -27,12 +27,12 @@ const createPost = async (req, res) => {
   // postImg is an array of pictures
   // totalSpent ? - might have to add sum of menuItem.price?
 
-  // finding user and restaraunt being referenced
+  // finding user and retaurant being referenced
     const userId = req.params.uId
-    const restarauntId = req.params.rId
-  console.log(">>>>>>>>>>>>>>>>>> USER AND RESTARAUNT <<<<<<<<<<<<<<<<<<<");
+    const retaurantId = req.params.rId
+  console.log(">>>>>>>>>>>>>>>>>> USER AND retaurant <<<<<<<<<<<<<<<<<<<");
   const postUser = await db.User.find({ _id: userId });
-  const postRestaraunt = await db.Restaraunt.find({ _id: restarauntId });
+  const postretaurant = await db.Restaurant.find({ _id: retaurantId });
   console.log("***********************************************************");
 
   //create new post, no comments yet
@@ -41,7 +41,7 @@ const createPost = async (req, res) => {
     body,
     postImg,
     customer: postUser,
-    restaraunt: postRestaraunt,
+    retaurant: postretaurant,
   });
   res.json(newPost)
   console.log(newPost);

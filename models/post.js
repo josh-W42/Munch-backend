@@ -12,9 +12,7 @@ const postSchema = new mongoose.Schema(
   {
     title: String,
     body: String,
-    restaurant: [
-      { type: mongoose.Schema.Types.ObjectId, ref: "Restaurant" },
-    ],
+    retaurant: [{ type: mongoose.Schema.Types.ObjectId, ref: "Restaurant" }],
     customer: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     comments: [commentSchema],
     postImg: [String],
