@@ -16,7 +16,7 @@ const test = async (req, res) => {
 
 // finding all post ******************
 const postIndex = async (req, res) => {
-  const allPost = db.Post.find({});
+  const allPost = await db.Post.find({});
   res.json(allPost);
 };
 
