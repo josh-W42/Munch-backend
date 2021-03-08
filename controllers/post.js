@@ -30,8 +30,8 @@ const createPost = async (req, res) => {
   const userId = req.params.uId;
   const restaurantId = req.params.rId;
   console.log(">>>>>>>>>>>>>>>>>> USER AND retaurant <<<<<<<<<<<<<<<<<<<");
-  const postUser = await db.User.find({ _id: userId });
-  const postrestaurant = await db.Restaurant.find({ _id: restaurantId });
+  const postUser = await db.User.findOne({ _id: userId });
+  const postrestaurant = await db.Restaurant.findOne({ _id: restaurantId });
   console.log("***********************************************************");
 
   //create new post, no comments yet
@@ -75,10 +75,20 @@ const addNewComment = async (req, res) => {
   console.log(foundPost);
 };
 
+// showing single post
+const showPost = async (req, res) => {
+    const _id = req.params.id;
+    const post = await db.Post.findOne({ _id })
+    res.json(post)
+    console.log(post)
+}
+
+
 // export all route functions
 module.exports = {
   test,
   postIndex,
   createPost,
   addNewComment,
+  showPost
 };
