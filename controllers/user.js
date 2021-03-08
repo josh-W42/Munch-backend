@@ -134,6 +134,25 @@ const all = async (req, res) => {
   }
 };
 
+// Route to Delete a User
+const remove = async (req, res) => {
+  const _id = req.params.id;
+  // find the user
+  try {
+    await db.User.deleteOne({ _id });
+    res.status(200).json({
+      success: true,
+      message: "User Deleted",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // export all route functions
 module.exports = {
   test,
@@ -141,4 +160,5 @@ module.exports = {
   login,
   profile,
   all,
+  remove,
 };
