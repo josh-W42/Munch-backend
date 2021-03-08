@@ -18,5 +18,6 @@ mongoose
 module.exports = {
   User: require("./user"),
   Restaurant: require("./restaurant"),
+  Category: require('./category'),
   Post: require("./post")
 };

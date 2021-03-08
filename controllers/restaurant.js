@@ -15,33 +15,50 @@ const test = async (req, res) => {
 
 // Controller for Registering a new Restaurant.
 const register = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, category } = req.body;
 
   // Ok so this is when do things like check if an email or name already exists
   try {
-    const user = await db.User.findOne({ email });
+    const restaurants = await db.Restaurant.find({
+      $or: [{ email }, { name }],
+    });
+    if (restaurants.length > 0) throw new Error("Email or Name already exists");
 
-    // But What about mongo validation? we could use the unique: true
-    if (user) throw new Error("Email already exists");
+    // Find the category
+    const foundCategory = await db.Category.findOne({ name: category });
+    if (!foundCategory) throw new Error("Category Does Not Exist");
 
     // Create a new user.
-    const newUser = await db.User.create({ name, email, password });
+    const newRestaurant = await db.Restaurant.create({
+      name,
+      email,
+      password,
+      imgUrl: "",
+      menu: [],
+      category: [foundCategory],
+    });
 
     // Salt and hash the password.
     bcrypt.genSalt(12, (error, salt) => {
       if (error) throw new Error("Salt Generation Failed");
 
-      bcrypt.hash(newUser.password, salt, async (error, hash) => {
+      bcrypt.hash(newRestaurant.password, salt, async (error, hash) => {
         if (error) throw new Error("Hash Password Failure");
 
-        newUser.password = hash;
-        const createdUser = await newUser.save();
-        res.json(createdUser);
+        newRestaurant.password = hash;
+        const createdRestaurant = await newRestaurant.save();
+        res
+          .status(201)
+          .json({
+            success: true,
+            restaurant: createdRestaurant,
+            message: "Restaurant Created",
+          });
       });
     });
   } catch (error) {
     console.error(error);
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ success: false, message: error.message });
   }
 };
 
@@ -92,7 +109,9 @@ const profile = async (req, res) => {
     res.json({ success: true, restaurant });
   } catch (error) {
     console.error(error);
-    res.status(400).json({ success: false, message: "Restaurant Does Not Exist" });
+    res
+      .status(400)
+      .json({ success: false, message: "Restaurant Does Not Exist" });
   }
 };
 
