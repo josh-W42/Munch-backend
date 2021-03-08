@@ -114,12 +114,7 @@ const profile = async (req, res) => {
 const all = async (req, res) => {
   // Find All with that id
   try {
-    let users = await db.User.find({});
-    // Remove passwords.
-    users = users.map((user) => {
-      user.password = "";
-      return user;
-    });
+    let users = await db.User.find({}).select('-password');
     res.json({ success: true, count: users.length, results: users });
   } catch (error) {
     console.error(error);
@@ -153,6 +148,33 @@ const remove = async (req, res) => {
   }
 };
 
+// Add a favorite restaurant via put
+const addFavorite = async (req, res) => {
+  const userId = req.params.userId;
+  const restaurantId = req.params.restaurantId;
+  try {
+    // First find the user, then the restaurant
+    const user = await db.User.findOne({ _id: userId });
+    if (!user) throw new Error('No User Found');
+
+    const restaurant = await db.Restaurant.findOne({ _id: restaurantId});
+    if (!restaurant) throw new Error('No Restaurant Found');
+
+    // Add a user favorite
+    user.favorites = user.favorites.concat([restaurant]);
+    await user.save();
+
+    res.json({ success: true, message: 'Restaurant Saved To Favorites' });
+
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+}
+
 // export all route functions
 module.exports = {
   test,
@@ -161,4 +183,5 @@ module.exports = {
   profile,
   all,
   remove,
+  addFavorite,
 };

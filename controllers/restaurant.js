@@ -19,10 +19,8 @@ const register = async (req, res) => {
 
   // Ok so this is when do things like check if an email or name already exists
   try {
-    const restaurants = await db.Restaurant.find({
-      $or: [{ email }, { name }],
-    });
-    if (restaurants.length > 0) throw new Error("Email or Name already exists");
+    const restaurants = await db.Restaurant.find({ email });
+    if (restaurants.length > 0) throw new Error("Email already exists");
 
     // Find the category
     const foundCategory = await db.Category.findOne({ name: category });
@@ -67,19 +65,19 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // First find user.
-    const findUser = await db.User.findOne({ email });
-    if (!findUser) throw new Error("User not found.");
+    // First find Restaurant.
+    const findRestaurant = await db.Restaurant.findOne({ email });
+    if (!findRestaurant) throw new Error("Restaurant not found.");
 
-    // Second compare the user password/
-    const isValid = await bcrypt.compare(password, findUser.password);
+    // Second compare the Restaurant password/
+    const isValid = await bcrypt.compare(password, findRestaurant.password);
     if (!isValid) throw new Error("Incorrect Password");
 
     // If the password is valid, then we send off the json web token payload
     const payload = {
-      id: findUser.id,
-      email: findUser.email,
-      name: findUser.name,
+      id: findRestaurant.id,
+      email: findRestaurant.email,
+      name: findRestaurant.name,
     };
 
     jwt.sign(payload, JWT_SECRET, { expiresIn: 3600 }, (error, token) => {
@@ -88,11 +86,11 @@ const login = async (req, res) => {
       // This verify method expires in 60 seconds if there is no response after attempting to verify the token
       const legit = jwt.verify(token, JWT_SECRET, { expiresIn: 60 });
 
-      res.json({ success: true, token: `Bearer ${token}`, userData: legit });
+      res.json({ success: true, token: `Bearer ${token}`, RestaurantData: legit });
     });
   } catch (error) {
     console.error(error);
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ success: false, message: error.message });
   }
 };
 
@@ -115,10 +113,30 @@ const profile = async (req, res) => {
   }
 };
 
+// Get All Restaurant Info information
+const all = async (req, res) => {
+  // Find All with that id
+  try {
+    let restaurants = await db.Restaurant.find({}).select('-password');
+    res.json({ success: true, count: restaurants.length, results: restaurants });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(400)
+      .json({
+        success: false,
+        message: "Couldn't GET all restaurants.",
+        count: 0,
+        results: [],
+      });
+  }
+};
+
 // export all route functions
 module.exports = {
   test,
   register,
   login,
   profile,
+  all,
 };
