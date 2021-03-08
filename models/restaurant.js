@@ -32,7 +32,7 @@ const restaurantSchema = new mongoose.Schema(
     // embedded
     menu: [productSchema],
     // reference
-    category: [{type: mongoose.Schema.Types.ObjectId, ref: 'Category'}]
+    category: [{ type: mongoose.Schema.Types.ObjectId, ref: "Category" }],
   },
   { timestamps: true }
 );
