@@ -116,14 +116,21 @@ const all = async (req, res) => {
   try {
     let users = await db.User.find({});
     // Remove passwords.
-    users = users.map(user => {
+    users = users.map((user) => {
       user.password = "";
-      return user
+      return user;
     });
     res.json({ success: true, count: users.length, results: users });
   } catch (error) {
     console.error(error);
-    res.status(400).json({ success: false, message: "Couldn't GET all users.", count: 0, results: [] });
+    res
+      .status(400)
+      .json({
+        success: false,
+        message: "Couldn't GET all users.",
+        count: 0,
+        results: [],
+      });
   }
 };
 
