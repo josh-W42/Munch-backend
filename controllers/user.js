@@ -114,12 +114,7 @@ const profile = async (req, res) => {
 const all = async (req, res) => {
   // Find All with that id
   try {
-    let users = await db.User.find({});
-    // Remove passwords.
-    users = users.map((user) => {
-      user.password = "";
-      return user;
-    });
+    let users = await db.User.find({}).select('-password');
     res.json({ success: true, count: users.length, results: users });
   } catch (error) {
     console.error(error);
