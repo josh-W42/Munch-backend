@@ -16,17 +16,33 @@ const test = async (req, res) => {
 
 // Controller for Registering a new User.
 const register = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { userName, email, password, firstName, lastName } = req.body;
 
-  // Ok so this is when do things like check if an email already exists
+  // check if an email or username already exists
   try {
-    const user = await db.User.findOne({ email });
+    const users = await db.User.find(
+      {
+        $or: [
+          { email },
+          { userName }
+        ]
+      }
+    );
 
     // But What about mongo validation? we could use the unique: true
-    if (user) throw new Error('Email already exists');
+    if (users.length > 0) throw new Error('Username or Email already exists');
 
     // Create a new user.
-    const newUser = await db.User.create({ name, email, password });
+    const newUser = await db.User.create({
+      userName,
+      email,
+      password,
+      firstName,
+      lastName,
+      followers: [],
+      following: [],
+      favorites: [],
+    });
 
     // Salt and hash the password.
     bcrypt.genSalt(12, (error, salt) => {
@@ -37,7 +53,7 @@ const register = async (req, res) => {
 
         newUser.password = hash;
         const createdUser = await newUser.save();
-        res.json(createdUser);
+        res.status(201).json({ user: createdUser, message: 'User Created' });
       });
     });
   } catch (error) {
@@ -100,11 +116,11 @@ const profile = async(req, res) => {
   const _id = req.params.id;
   // Find a user with that id
   try {
-    const user = await db.User.find({ _id });
+    const user = await db.User.findOne({ _id });
     // If it doesn't exist, throw an error
     if (!user) throw new Error("User Does Not Exist.");
     // Remove password.
-    delete user.password;
+    user.password = ''
     res.json({ user });
   } catch (error) {
     console.error(error);
