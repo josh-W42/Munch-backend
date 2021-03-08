@@ -113,10 +113,30 @@ const profile = async (req, res) => {
   }
 };
 
+// Get All Restaurant Info information
+const all = async (req, res) => {
+  // Find All with that id
+  try {
+    let restaurants = await db.Restaurant.find({}).select('-password');
+    res.json({ success: true, count: restaurants.length, results: restaurants });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(400)
+      .json({
+        success: false,
+        message: "Couldn't GET all restaurants.",
+        count: 0,
+        results: [],
+      });
+  }
+};
+
 // export all route functions
 module.exports = {
   test,
   register,
   login,
   profile,
+  all,
 };

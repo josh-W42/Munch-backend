@@ -1,5 +1,5 @@
 module.exports = {
   user: require('./user'),
-  retaurant: require('./restaurant'),
+  restaurant: require('./restaurant'),
   post: require('./post')
 }
