@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const commentSchema = new mongoose.Schema({
+  author: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   header: String,
   content: String,
   date: Date,
@@ -9,6 +10,8 @@ const commentSchema = new mongoose.Schema({
 
 const postSchema = new mongoose.Schema(
   {
+    title: String,
+    body: String,
     restaraunt: [
       { type: mongoose.Schema.Types.ObjectId, ref: "Restaraunt" },
     ],
