@@ -80,9 +80,20 @@ const login = async (req, res) => {
 };
 
 // Get Profile information
-const profile = (req, res) => {
-  const { id, name, email } = req.user;
-  res.json({ id, name, email });
+const profile = async (req, res) => {
+  const _id = req.params.id;
+  // Find a user with that id
+  try {
+    const restaurant = await db.Restaurant.findOne({ _id });
+    // If it doesn't exist, throw an error
+    if (!restaurant) throw new Error("Restaurant Does Not Exist.");
+    // Remove password.
+    restaurant.password = "";
+    res.json({ success: true, restaurant });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ success: false, message: "Restaurant Does Not Exist" });
+  }
 };
 
 // export all route functions
