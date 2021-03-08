@@ -19,13 +19,13 @@ const categories = [ // multiple categories
 const oneCategory = { name: 'Chinese'}; // single category
 
 const addManyCategories = async () => {
-  const savedExamples = await db.Example.insertMany(examples); // creating many categories
-  console.log('=======> Saved Many Categories.');
+  const savedExamples = await db.Category.insertMany(categories); // creating many categories
+  console.log("=======> Saved Many Categories.");
   console.log(savedExamples);
 }
 
 const addOneCategory = async () => {
-  const savedOneExample = await db.Example.create(oneExample); // creating the one category
+  const savedOneExample = await db.Category.create(oneCategory); // creating the one category
   console.log("=======> Saved One Category.");
   console.log(savedOneExample);
 };
