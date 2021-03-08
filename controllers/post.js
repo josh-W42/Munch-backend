@@ -14,8 +14,14 @@ const test = async (req, res) => {
   res.json({ message: "User endpoint OK!" });
 };
 
-// creating post
-const createPost = async () => {
+// finding all post ******************
+const postIndex = async (req, res) => {
+    const allPost = db.Post.find({ })
+    res.json(allPost)
+}
+
+// creating post *********************
+const createPost = async (req, res) => {
 
   const { title, body, postImg } = req.body;   // destructured post content
   // postImg is an array of pictures
@@ -37,13 +43,15 @@ const createPost = async () => {
     customer: postUser,
     restaraunt: postRestaraunt,
   });
+  res.json(newPost)
   console.log(newPost);
 };
 
-const addNewComment = async () => {
+// adding a new comment *******************
+const addNewComment = async (req, res) => {
   // finding author of comment
   // instead of linking an author to a user - we can make this an input field as well? 
-  const authorId = req.params.authId;
+  const authorId = req.params.uId;
   const commentAuthor = await db.User.find({ _id: authorId });
 
   const { header, content } = req.body;   // destructured comment content
@@ -63,12 +71,16 @@ const addNewComment = async () => {
   //save it - this takes time .save()
   await foundPost.save();
 
+  res.json(foundPost)
   console.log(foundPost);
 };
+
+
 
 // export all route functions
 module.exports = {
   test,
+  postIndex,
   createPost,
   addNewComment,
 };
