@@ -132,6 +132,25 @@ const all = async (req, res) => {
   }
 };
 
+// Route to Delete a Restaurant
+const remove = async (req, res) => {
+  const _id = req.params.id;
+  // find the restaurant
+  try {
+    await db.Restaurant.deleteOne({ _id });
+    res.status(200).json({
+      success: true,
+      message: "Restaurant Deleted",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // export all route functions
 module.exports = {
   test,
@@ -139,4 +158,5 @@ module.exports = {
   login,
   profile,
   all,
+  remove,
 };
