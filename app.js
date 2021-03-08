@@ -21,16 +21,15 @@ app.use(express.static(path.resolve(__dirname, "clients", "build")));
 // API Routes
 app.get("/api/", (req, res) => {
   res.json({
-    name: "MERN Auth API",
-    greeting: "Welcome to the our API",
-    author: "YOU",
-    message: "Smile, you are being watched by the Backend Engineering Team",
+    name: "Munch API",
+    greeting: "Welcome to the Munch API",
+    authors: "Andrew Bith, Nelson J Valerio, Joshua Wilson",
+    message: "Hello from the Munch Team!",
   });
 });
 
-app.use("/api/examples", routes.example);
 app.use("/api/users", routes.user);
-app.use("/api/restaraunts", routes.restaraunt);
+app.use("/api/restaurants", routes.restaurant);
 
 // Server
 const server = app.listen(PORT, () =>
