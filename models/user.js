@@ -25,11 +25,11 @@ const userSchema = new mongoose.Schema({
     minLength: 8,
     required: true,
   },
-  favorites: [{type: mongoose.Schema.Types.ObjectId, ref: 'Restaraunt'}],
+  favorites: [{type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant'}],
   followers: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}], // idk if this works
   following: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}], // idk if this works
-  payments: null, 
-  location: null,
+  // payments: null, commenting these out for now
+  // location: null,
 },
   { timestamps: true }
 )

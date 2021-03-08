@@ -9,7 +9,7 @@ const productSchema = new mongoose.Schema({
   type: String,
 });
 
-const restarauntSchema = new mongoose.Schema(
+const restaurantSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -25,18 +25,18 @@ const restarauntSchema = new mongoose.Schema(
       minLength: 8,
       required: true,
     },
-    location: null,
+    // location: null, null for now
     imgUrl: {
       type: String,
     },
     // embedded
     menu: [productSchema],
     // reference
-    category: [{type: mongoose.Schema.Types.categoryId, ref: 'Category'}]
+    category: [{type: mongoose.Schema.Types.ObjectId, ref: 'Category'}]
   },
   { timestamps: true }
 );
 
-const Restaraunt = mongoose.model("Restaraunt", restarauntSchema);
+const Restaurant = mongoose.model("Restaurant", restaurantSchema);
 
-module.exports = Restaraunt;
+module.exports = Restaurant;
