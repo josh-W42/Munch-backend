@@ -16,23 +16,22 @@ const test = async (req, res) => {
 
 // finding all post ******************
 const postIndex = async (req, res) => {
-    const allPost = db.Post.find({ })
-    res.json(allPost)
-}
+  const allPost = db.Post.find({});
+  res.json(allPost);
+};
 
 // creating post *********************
 const createPost = async (req, res) => {
-
-  const { title, body, postImg } = req.body;   // destructured post content
+  const { title, body, postImg } = req.body; // destructured post content
   // postImg is an array of pictures
   // totalSpent ? - might have to add sum of menuItem.price?
 
   // finding user and retaurant being referenced
-    const userId = req.params.uId
-    const retaurantId = req.params.rId
+  const userId = req.params.uId;
+  const restaurantId = req.params.rId;
   console.log(">>>>>>>>>>>>>>>>>> USER AND retaurant <<<<<<<<<<<<<<<<<<<");
   const postUser = await db.User.find({ _id: userId });
-  const postretaurant = await db.Restaurant.find({ _id: retaurantId });
+  const postrestaurant = await db.Restaurant.find({ _id: restaurantId });
   console.log("***********************************************************");
 
   //create new post, no comments yet
@@ -41,23 +40,24 @@ const createPost = async (req, res) => {
     body,
     postImg,
     customer: postUser,
-    retaurant: postretaurant,
+    retaurant: postrestaurant,
   });
-  res.json(newPost)
+  res.json(newPost);
   console.log(newPost);
 };
 
 // adding a new comment *******************
 const addNewComment = async (req, res) => {
+    console.log('ADDING NEW COMMENT ROUTE')
   // finding author of comment
-  // instead of linking an author to a user - we can make this an input field as well? 
+  // instead of linking an author to a user - we can make this an input field as well?
   const authorId = req.params.uId;
   const commentAuthor = await db.User.find({ _id: authorId });
 
-  const { header, content } = req.body;   // destructured comment content
+  const { header, content } = req.body; // destructured comment content
 
   //find a post
-  const postId = req.params.pId
+  const postId = req.params.pId;
   const foundPost = await db.Post.findOne({ _id: postId });
   console.log(foundPost);
   //use mongooses push method on foundPost.comments
@@ -71,11 +71,9 @@ const addNewComment = async (req, res) => {
   //save it - this takes time .save()
   await foundPost.save();
 
-  res.json(foundPost)
+  res.json(foundPost);
   console.log(foundPost);
 };
-
-
 
 // export all route functions
 module.exports = {
