@@ -96,9 +96,20 @@ const login = async (req, res) => {
 }
 
 // Get Profile information
-const profile = (req, res) => {
-  const { id, name, email } = req.user;
-  res.json({ id, name, email });
+const profile = async(req, res) => {
+  const _id = req.params.id;
+  // Find a user with that id
+  try {
+    const user = await db.User.find({ _id });
+    // If it doesn't exist, throw an error
+    if (!user) throw new Error("User Does Not Exist.");
+    // Remove password.
+    delete user.password;
+    res.json({ user });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: 'User Does Not Exist' });
+  }
 }
 
 // export all route functions
