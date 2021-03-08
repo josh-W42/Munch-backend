@@ -55,7 +55,7 @@ const createPost = async (req, res) => {
   const restaurantId = req.params.rId;
   console.log(">>>>>>>>>>>>>>>>>> USER AND retaurant <<<<<<<<<<<<<<<<<<<");
   const postUser = await db.User.findOne({ _id: userId });
-  const postrestaurant = await db.Restaurant.findOne({ _id: restaurantId });
+  const postRestaurant = await db.Restaurant.findOne({ _id: restaurantId });
   console.log("***********************************************************");
 
   //create new post, no comments yet
@@ -64,7 +64,7 @@ const createPost = async (req, res) => {
     body,
     postImg,
     customer: postUser,
-    retaurant: postrestaurant,
+    restaurant: postRestaurant,
   });
   res.json(newPost);
   console.log(newPost);
