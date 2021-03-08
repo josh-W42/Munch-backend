@@ -2,10 +2,10 @@ const router = require("express").Router();
 const ctrl = require("../controllers");
 const passport = require("passport");
 
-router.get("/test", ctrl.retaurant.test);
-router.get("/all", ctrl.retaurant.all);
-router.get("/:id", ctrl.retaurant.profile);
-router.post("/register", ctrl.retaurant.register);
-router.post("/login", ctrl.retaurant.login);
+router.get("/test", ctrl.restaurant.test);
+router.get("/all", ctrl.restaurant.all);
+router.get("/:id", ctrl.restaurant.profile);
+router.post("/register", ctrl.restaurant.register);
+router.post("/login", ctrl.restaurant.login);
 
 module.exports = router;
