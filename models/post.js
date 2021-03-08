@@ -9,6 +9,8 @@ const commentSchema = new mongoose.Schema({
 
 const postSchema = new mongoose.Schema(
   {
+    title: String,
+    body: String,
     restaraunt: [
       { type: mongoose.Schema.Types.ObjectId, ref: "Restaraunt" },
     ],
