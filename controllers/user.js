@@ -11,7 +11,14 @@ const db = require("../models");
 
 // basic test
 const test = async (req, res) => {
-  res.json({ message: "User endpoint OK!" });
+  // How to structure and decode a token from authorization
+  if (req.headers.authorization) {
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+    res.json({ auhtorized: true, payload });
+  } else {
+    res.json({ auhtorized: false })
+  }
 };
 
 // Controller for Registering a new User.
