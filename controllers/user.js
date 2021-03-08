@@ -110,10 +110,55 @@ const profile = async (req, res) => {
   }
 };
 
+// Get All user Info information
+const all = async (req, res) => {
+  // Find All with that id
+  try {
+    let users = await db.User.find({});
+    // Remove passwords.
+    users = users.map((user) => {
+      user.password = "";
+      return user;
+    });
+    res.json({ success: true, count: users.length, results: users });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(400)
+      .json({
+        success: false,
+        message: "Couldn't GET all users.",
+        count: 0,
+        results: [],
+      });
+  }
+};
+
+// Route to Delete a User
+const remove = async (req, res) => {
+  const _id = req.params.id;
+  // find the user
+  try {
+    await db.User.deleteOne({ _id });
+    res.status(200).json({
+      success: true,
+      message: "User Deleted",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // export all route functions
 module.exports = {
   test,
   register,
   login,
   profile,
+  all,
+  remove,
 };
