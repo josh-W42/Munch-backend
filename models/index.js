@@ -1,5 +1,5 @@
-require('dotenv').config();
-const mongoose = require('mongoose');
+require("dotenv").config();
+const mongoose = require("mongoose");
 
 // Better Practice to hid the mongo url
 const { MONGO_URL } = process.env;
@@ -10,11 +10,12 @@ const configOptions = {
   useFindAndModify: false,
 };
 
-mongoose.connect(MONGO_URL, configOptions)
-    .then(() => console.log('MongoDB successfully connected...'))
-    .catch(err => console.log('MongoDB connection error:', err));
+mongoose
+  .connect(MONGO_URL, configOptions)
+  .then(() => console.log("MongoDB successfully connected..."))
+  .catch((err) => console.log("MongoDB connection error:", err));
 
 module.exports = {
-    User: require('./user'),
-    Restaurant: require('./restaurant')
-}
+  User: require("./user"),
+  Restaurant: require("./restaurant"),
+};
