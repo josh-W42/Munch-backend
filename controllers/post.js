@@ -16,9 +16,33 @@ const test = async (req, res) => {
 
 // finding all post ******************
 const postIndex = async (req, res) => {
-  const allPost = db.Post.find({});
+  const allPost = await db.Post.find({});
   res.json(allPost);
 };
+
+// finding a speciic post **********************
+const showPost = async (req, res) => {
+    const _id = req.params.id;
+    const post = await db.Post.findOne({ _id })
+    res.json(post)
+    console.log(post)
+}
+
+// finding all post related to an author **********************
+const postIndexAuthor = async (req, res) => {
+    const _id = req.params.id;
+    const post = await db.Post.find({ customer: _id })
+    res.json(post)
+    console.log(post)
+}
+
+// finding all post related to an restaurant **********************
+const postIndexRestaurant = async (req, res) => {
+    const _id = req.params.id;
+    const post = await db.Post.find({ restaurant: _id })
+    res.json(post)
+    console.log(post)
+}
 
 // creating post *********************
 const createPost = async (req, res) => {
@@ -75,19 +99,13 @@ const addNewComment = async (req, res) => {
   console.log(foundPost);
 };
 
-// showing single post
-const showPost = async (req, res) => {
-    const _id = req.params.id;
-    const post = await db.Post.findOne({ _id })
-    res.json(post)
-    console.log(post)
-}
-
 
 // export all route functions
 module.exports = {
   test,
   postIndex,
+  postIndexAuthor,
+  postIndexRestaurant,
   createPost,
   addNewComment,
   showPost

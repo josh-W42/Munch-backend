@@ -4,6 +4,8 @@ const passport = require("passport");
 
 router.get("/test", ctrl.post.test);
 router.get("/index", ctrl.post.postIndex);
+router.get("/index/author/:id", ctrl.post.postIndexAuthor);
+router.get("/index/restaurant/:id", ctrl.post.postIndexRestaurant);
 router.post("/createPost/:rId/:uId", ctrl.post.createPost);
 router.post("/addComment/:pId/:uId", ctrl.post.addNewComment);
 router.get("/:id", ctrl.post.showPost)
