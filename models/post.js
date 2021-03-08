@@ -12,8 +12,8 @@ const postSchema = new mongoose.Schema(
   {
     title: String,
     body: String,
-    restaraunt: [
-      { type: mongoose.Schema.Types.ObjectId, ref: "Restaraunt" },
+    restaurant: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "Restaurant" },
     ],
     customer: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     comments: [commentSchema],
