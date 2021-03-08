@@ -1,25 +1,24 @@
 {
-  "name": "munch",
+  "name": "munch-backend",
   "version": "1.0.0",
   "description": "TODO",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
     "seed": "node seed.js",
-    "heroku-postbuild": "cd client && npm install --only=dev && npm install && npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/josh-W42/Munch.git"
+    "url": "git+https://github.com/josh-W42/Munch-backend"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/josh-W42/Munch/issues"
+    "url": "https://github.com/josh-W42/Munch-backend/issues"
   },
-  "homepage": "https://github.com/josh-W42/Munch#readme",
+  "homepage": "https://github.com/josh-W42/Munch-backend#readme",
   "dependencies": {
     "axios": "^0.21.1",
     "bcrypt": "^5.0.1",
@@ -30,7 +29,6 @@
     "mongoose": "^5.11.19",
     "node-fetch": "^2.6.1",
     "passport": "^0.4.1",
-    "passport-jwt": "^4.0.0",
-    "path": "^0.12.7"
+    "passport-jwt": "^4.0.0"
   }
 }
