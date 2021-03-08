@@ -10,9 +10,9 @@ const commentSchema = new mongoose.Schema({
 const postSchema = new mongoose.Schema(
   {
     restaraunt: [
-      { type: mongoose.Schema.Types.restarauntId, ref: "Restaraunt" },
+      { type: mongoose.Schema.Types.ObjectId, ref: "Restaraunt" },
     ],
-    customer: [{ type: mongoose.Schema.Types.usertId, ref: "User" }],
+    customer: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     comments: [commentSchema],
     postImg: [String],
     totalSpent: Number,
