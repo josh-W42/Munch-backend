@@ -86,7 +86,7 @@ const postIndexRestaurant = async (req, res) => {
 
 // creating post *********************
 const createPost = async (req, res) => {
-  const { title, body, postImg } = req.body; // destructured post content
+  const { title, content, postImg } = req.body; // destructured post content
   try {
     if (req.headers.authorization) {
       const [type, token] = await req.headers.authorization.split(" ");
@@ -102,7 +102,7 @@ const createPost = async (req, res) => {
       //create new post, no comments yet
       const newPost = await db.Post.create({
         title,
-        body,
+        content,
         postImg,
         customer: postUser,
         restaurant: postRestaurant,
@@ -119,6 +119,40 @@ const createPost = async (req, res) => {
     });
   }
 };
+
+// updating post *********************
+const updatePost = async (req, res) => {
+    const { title, content, postImg } = req.body // updated post information
+
+    try {
+        if(req.headers.authorization) {
+            const [type, token] = await req.headers.authorization.split(" ");
+            const payload = await jwt.decode(token);
+            const userId = payload.id
+            const postFound = await db.Post.findOne({_id: req.params.id})
+
+            if (userId === postFound.customer.toString()) {
+                console.log('we have a match')
+                if (req.body.title) postFound.title = req.body.title;
+                if (req.body.body) postFound.content = req.body.content;
+                if (req.body.postImg) postFound.postImg = req.body.postImg;
+                res.json({message: 'Post has been updated'})
+
+            } else {
+                res.json({ message: "You do not have permission to update this post"})
+            }
+        } else {
+            res.json({ message: "You must be logged in to update a post you own"})
+        }
+    } catch(error) {
+        console.error(error);
+        res.status(400).json({
+            success: false,
+            message: "Error - Unable to update this post"
+        })
+    }
+}
+
 
 // deleting post *********************
 const deletePost = async (req, res) => {
@@ -149,6 +183,7 @@ const deletePost = async (req, res) => {
         })
     }
 }
+
 // adding a new comment *******************
 const addNewComment = async (req, res) => {
   const { header, content } = req.body; // destructured comment content
@@ -195,4 +230,5 @@ module.exports = {
   addNewComment,
   showPost,
   deletePost,
+  updatePost,
 };

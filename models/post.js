@@ -11,12 +11,12 @@ const commentSchema = new mongoose.Schema({
 const postSchema = new mongoose.Schema(
   {
     title: String,
-    body: String,
+    content: String,
     restaurant: { type: mongoose.Schema.Types.ObjectId, ref: "Restaurant" },
     customer: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     comments: [commentSchema],
     postImg: [String],
-    totalSpent: Number,
+    likes: Number
   },
   { timestamps: true }
 );
