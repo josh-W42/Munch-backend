@@ -12,6 +12,7 @@ const PORT = process.env.PORT || 8000;
 
 // Middleware
 app.use(express.urlencoded({ extended: false }));
+app.use(require('morgan')('dev'));
 app.use(express.json()); // JSON parsing
 app.use(cors()); // allow all CORS requests
 app.use(passport.initialize());

@@ -3,7 +3,9 @@ const ctrl = require("../controllers");
 const passport = require("passport");
 
 router.get("/test", ctrl.post.test);
+
 router.get("/index", ctrl.post.postIndex);
+
 router.get("/:id", ctrl.post.showPost)
 router.get("/index/author/:id", ctrl.post.postIndexAuthor);
 router.get("/index/restaurant/:id", ctrl.post.postIndexRestaurant);
@@ -15,5 +17,6 @@ router.put("/:id/update", passport.authenticate('jwt', { session: false }), ctrl
 router.put("/:id/:cid/edit", passport.authenticate('jwt', { session: false }), ctrl.post.editComment);
 
 router.delete("/:id/delete", passport.authenticate('jwt', { session: false }), ctrl.post.deletePost)
+router.delete("/:id/:cid/delete", passport.authenticate('jwt', { session: false }), ctrl.post.deleteComment)
 
 module.exports = router;
