@@ -31,6 +31,11 @@ router.put(
   passport.authenticate("jwt", { session: false }),
   ctrl.user.addFavorite
 );
+router.put(
+  "/follow/:otherId",
+  passport.authenticate("jwt", { session: false }),
+  ctrl.user.follow
+);
 router.delete(
   "/:id/delete",
   passport.authenticate("jwt", { session: false }),

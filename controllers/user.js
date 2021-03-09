@@ -369,6 +369,44 @@ const addFavorite = async (req, res) => {
   }
 }
 
+// Route To Follow Someone Else
+const follow = async (req, res) => {
+  const otherId = req.params.otherId;
+  try {
+    // find "viewing" user
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+    const viewer = await db.User.findOne({ _id: payload.id });
+    
+    // find the "other" user
+    const otherUser = await db.User.findOne({ _id: otherId });
+    if (!otherUser) throw new Error(`The User You're attempting To Follow Does Not Exist.`);
+    
+    // Check the follow status
+    if (viewer.following.includes(otherUser.id)) throw new Error(`You're Already Following That User.`);
+    
+    // Viewer now follows otherUser
+    viewer.following.push(otherUser._id);
+    await viewer.save();
+
+    // OtherUser now has a follower
+    otherUser.followers.push(viewer._id);
+    await otherUser.save();
+
+
+    res.json({
+      success: true,
+      message: "Successfully Followed User"
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}
+
 // export all route functions
 module.exports = {
   test,
@@ -381,4 +419,5 @@ module.exports = {
   addFavorite,
   changeProfileImg,
   changeCoverImg,
+  follow,
 };
