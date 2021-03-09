@@ -348,7 +348,7 @@ const addMenuItem = async (req, res) => {
   console.log('adding menu item route')
   const _id = req.params.id;
   try {
-    const [type, token] = req.headers.authroization.split(" ");
+    const [type, token] = req.headers.authorization.split(" ");
     const payload = jwt.decode(token);
     if (payload.id !== _id) throw new Error("Not your menu")
 
@@ -387,9 +387,7 @@ module.exports = {
   profile,
   all,
   remove,
-
   addMenuItem,
-
   edit,
   changeProfileImg,
   changeCoverImg,
