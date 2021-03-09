@@ -19,5 +19,6 @@ module.exports = {
   User: require("./user"),
   Restaurant: require("./restaurant"),
   Category: require('./category'),
-  Post: require("./post")
+  Post: require("./post"),
+  Order: require("./order")
 };
