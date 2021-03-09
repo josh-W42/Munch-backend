@@ -10,8 +10,6 @@ const { JWT_SECRET } = process.env;
 const db = require("../models");
 
 // Cloudinary
-const multer = require('multer');
-const uploads = multer({ dest: './uploads' });
 const cloudinary = require('cloudinary');
 
 // basic test
@@ -143,12 +141,74 @@ const all = async (req, res) => {
   }
 };
 
+// Route to edit a User
+const edit = async (req, res) => {
+  const _id = req.params.id;
+  try {
+    // find the current user
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+    // check if the user is editing only themselves
+    if (payload.id !== _id) throw new Error("Forbidden");
+
+    const { userName, email, oldPassword, newPassword, firstName, lastName } = req.body;
+
+    const user = await db.User.findOne({ _id });
+
+    // if user submitted an oldPassword and newPassword
+    if (oldPassword && newPassword) {
+      // compare old password
+      const isValid = await bcrypt.compare(oldPassword, user.password);
+      if (!isValid) throw new Error("Old Password Inccorect");
+
+      const isOldPassword = await bcrypt.compare(newPassword, user.password);
+      if (isOldPassword) throw new Error("New Password Cannot Be Old Password");
+
+      // Salt and hash the password.
+      bcrypt.genSalt(12, (error, salt) => {
+        if (error) throw new Error("Salt Generation Failed");
+
+        bcrypt.hash(newPassword, salt, async (error, hash) => {
+          if (error) throw new Error("Hash Password Failure");
+
+          // We can now save that new password.
+          user.password = hash;
+          await user.save();
+        }); 
+      });
+    };
+
+    user.userName = userName;
+    user.email = email;
+    user.firstName = firstName;
+    user.lastName = lastName;
+
+    // Save the user and the changes.
+    await user.save();
+
+    res.json({ success: true, message: "User Edit Successful." });
+  } catch (error) {
+    console.error(error);
+    if (error.message === "Forbidden") {
+      res.status(403).json({
+        success: false,
+        message: "You Must Be logged In As That User To Do That",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+}
+
 // Route to Delete a User
 const remove = async (req, res) => {
   // id of user to delete
   const _id = req.params.id;
   try {
-    // find the user
+    // find the current user
     const [type, token] = req.headers.authorization.split(' ');
     const payload = jwt.decode(token);
     // check if user is deleting only themselves
@@ -212,6 +272,7 @@ module.exports = {
   login,
   profile,
   all,
+  edit,
   remove,
   addFavorite,
 };
