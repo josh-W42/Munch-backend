@@ -145,7 +145,7 @@ const remove = async (req, res) => {
     const [type, token] = req.headers.authorization.split(' ');
     const payload = jwt.decode(token);
     // check if user is deleting only themselves
-    if (payload.id !== _id) throw new Error('Attempted To Delete Another User');
+    if (payload.id !== _id) throw new Error("Forbidden");
 
     await db.User.deleteOne({ _id });
     res.status(200).json({
@@ -154,10 +154,17 @@ const remove = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    if (error.message === "Forbidden") {
+      res.status(403).json({
+        success: false,
+        message: "You Must Be logged In As That User To Do That",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
   }
 };
 

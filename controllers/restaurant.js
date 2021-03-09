@@ -135,8 +135,13 @@ const all = async (req, res) => {
 // Route to Delete a Restaurant
 const remove = async (req, res) => {
   const _id = req.params.id;
-  // find the restaurant
   try {
+    // Check that restaurant is deleting themselves
+    const [type, token] = req.headers.authorization.split(" ");
+    const payload = jwt.decode(token);
+    if (payload.id !== _id) throw new Error("Forbidden");
+
+    // find the restaurant
     await db.Restaurant.deleteOne({ _id });
     res.status(200).json({
       success: true,
@@ -144,10 +149,17 @@ const remove = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    if (error.message === "Forbidden") {
+      res.status(403).json({
+        success: false,
+        message: "You Must Be logged In As This Restaurant To Do That",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
   }
 };
 
