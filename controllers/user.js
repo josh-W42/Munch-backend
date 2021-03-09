@@ -15,9 +15,9 @@ const test = async (req, res) => {
   if (req.headers.authorization) {
     const [type, token] = req.headers.authorization.split(' ');
     const payload = jwt.decode(token);
-    res.json({ auhtorized: true, payload });
+    res.json({ authenticated: true, payload });
   } else {
-    res.json({ auhtorized: false })
+    res.json({ authenticated: false })
   }
 };
 
@@ -138,9 +138,15 @@ const all = async (req, res) => {
 
 // Route to Delete a User
 const remove = async (req, res) => {
+  // id of user to delete
   const _id = req.params.id;
-  // find the user
   try {
+    // find the user
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+    // check if user is deleting only themselves
+    if (payload.id !== _id) throw new Error('Attempted To Delete Another User');
+
     await db.User.deleteOne({ _id });
     res.status(200).json({
       success: true,
@@ -157,13 +163,16 @@ const remove = async (req, res) => {
 
 // Add a favorite restaurant via put
 const addFavorite = async (req, res) => {
-  const userId = req.params.userId;
   const restaurantId = req.params.restaurantId;
   try {
-    // First find the user, then the restaurant
-    const user = await db.User.findOne({ _id: userId });
-    if (!user) throw new Error('No User Found');
+    // First, get the userId
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+    const userId = payload.id
 
+    const user = await db.User.findOne({ _id: userId });
+
+    // Then find the restaurant
     const restaurant = await db.Restaurant.findOne({ _id: restaurantId});
     if (!restaurant) throw new Error('No Restaurant Found');
 
