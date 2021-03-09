@@ -12,6 +12,7 @@ router.post("/createPost/:id/", passport.authenticate('jwt', { session: false })
 router.post("/addComment/:id/", passport.authenticate('jwt', { session: false }), ctrl.post.addNewComment);
 
 router.put("/:id/update", passport.authenticate('jwt', { session: false }), ctrl.post.updatePost);
+router.put("/:id/:cid/edit", passport.authenticate('jwt', { session: false }), ctrl.post.editComment);
 
 router.delete("/:id/delete", passport.authenticate('jwt', { session: false }), ctrl.post.deletePost)
 
