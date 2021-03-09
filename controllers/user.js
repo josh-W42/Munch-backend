@@ -261,6 +261,51 @@ const changeProfileImg = async (req, res) => {
   }
 };
 
+// Change Cover Photo
+const changeCoverImg = async (req, res) => {
+  const _id = req.params.id;
+  try {
+    // find the current user
+    const [type, token] = req.headers.authorization.split(" ");
+    const payload = jwt.decode(token);
+    // check if the user is editing only themselves
+    if (payload.id !== _id) throw new Error("Forbidden");
+
+    // get the user
+    const user = await db.User.findOne({ _id });
+
+    // First see if you can process the image.
+    // Check if user inputed an image.
+    let coverUrl = user.coverImg;
+    if (req.file) {
+      let image = req.file.path;
+      try {
+        const result = await cloudinary.uploader.upload(image);
+        coverUrl = result.secure_url;
+      } catch (error) {
+        throw new Error("Could Not Upload To Cloudinary");
+      }
+    }
+
+    user.coverImg = coverUrl;
+    await user.save();
+    res.json({ success: true, message: "Cover Picture Successfuly Changed" });
+  } catch (error) {
+    console.error(error);
+    if (error.message === "Forbidden") {
+      res.status(403).json({
+        success: false,
+        message: "You Must Be logged In As That User To Do That",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+};
+
 // Route to Delete a User
 const remove = async (req, res) => {
   // id of user to delete
@@ -334,4 +379,5 @@ module.exports = {
   remove,
   addFavorite,
   changeProfileImg,
+  changeCoverImg,
 };
