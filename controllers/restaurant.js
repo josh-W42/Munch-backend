@@ -92,6 +92,7 @@ const login = async (req, res) => {
       id: findRestaurant.id,
       email: findRestaurant.email,
       name: findRestaurant.name,
+      type: "restaurant",
     };
 
     jwt.sign(payload, JWT_SECRET, { expiresIn: 3600 }, (error, token) => {
@@ -146,6 +147,81 @@ const all = async (req, res) => {
   }
 };
 
+// Route to edit a Restaurant
+const edit = async (req, res) => {
+  const _id = req.params.id;
+  try {
+    // find the current restaurant
+    const [type, token] = req.headers.authorization.split(" ");
+    const payload = jwt.decode(token);
+    // check if the restaurant is editing only themselves
+    if (payload.id !== _id) throw new Error("Forbidden");
+
+    const { name, email, oldPassword, newPassword, category } = req.body;
+
+    const restaurant = await db.Restaurant.findOne({ _id });
+
+    // if restaurant submitted an oldPassword and newPassword
+    if (oldPassword && newPassword) {
+      // compare old password
+      const isValid = await bcrypt.compare(oldPassword, restaurant.password);
+      if (!isValid) throw new Error("Old Password Inccorect");
+
+      const isOldPassword = await bcrypt.compare(
+        newPassword,
+        restaurant.password
+      );
+      if (isOldPassword) throw new Error("New Password Cannot Be Old Password");
+
+      // Salt and hash the password.
+      bcrypt.genSalt(12, (error, salt) => {
+        if (error) throw new Error("Salt Generation Failed");
+
+        bcrypt.hash(newPassword, salt, async (error, hash) => {
+          if (error) throw new Error("Hash Password Failure");
+
+          // We can now save that new password.
+          restaurant.password = hash;
+          await restaurant.save();
+        });
+      });
+    }
+
+    // Find the category
+    const foundCategory = await db.Category.findOne({ name: category });
+    if (!foundCategory) throw new Error("Category Does Not Exist");
+
+    restaurant.name = name;
+    restaurant.email = email;
+    restaurant.category = [foundCategory];
+
+    // Save the restaurant and the changes.
+    await restaurant.save();
+
+    res.json({ success: true, message: "Restaurant Edit Successful." });
+  } catch (error) {
+    console.error(error);
+    if (error.message === "Forbidden") {
+      res.status(403).json({
+        success: false,
+        message: "You Must Be logged In As That Restaurant To Do That",
+      });
+    } else if (error.name === "MongoError") {
+      const needToChange = error.keyPattern;
+      res.status(409).json({
+        success: false,
+        message: "DataBase Error",
+        needToChange,
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+};
+
 // Route to Delete a Restaurant
 const remove = async (req, res) => {
   const _id = req.params.id;
@@ -185,4 +261,5 @@ module.exports = {
   profile,
   all,
   remove,
+  edit,
 };
