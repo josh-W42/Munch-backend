@@ -163,13 +163,16 @@ const remove = async (req, res) => {
 
 // Add a favorite restaurant via put
 const addFavorite = async (req, res) => {
-  const userId = req.params.userId;
   const restaurantId = req.params.restaurantId;
   try {
-    // First find the user, then the restaurant
-    const user = await db.User.findOne({ _id: userId });
-    if (!user) throw new Error('No User Found');
+    // First, get the userId
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+    const userId = payload.id
 
+    const user = await db.User.findOne({ _id: userId });
+
+    // Then find the restaurant
     const restaurant = await db.Restaurant.findOne({ _id: restaurantId});
     if (!restaurant) throw new Error('No Restaurant Found');
 
