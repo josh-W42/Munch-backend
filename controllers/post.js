@@ -92,7 +92,7 @@ const createPost = async (req, res) => {
       const [type, token] = await req.headers.authorization.split(" ");
       const payload = await jwt.decode(token);
       const userId = payload.id;
-      const restaurantId = req.params.rId;
+      const restaurantId = req.params.id;
 
       const postUser = await db.User.findOne({ _id: userId });
       if (!postUser) throw new Error("User Does Not Exist.");
@@ -120,6 +120,35 @@ const createPost = async (req, res) => {
   }
 };
 
+// deleting post *********************
+const deletePost = async (req, res) => {
+    console.log('You are trying to delete something')
+    try {
+        if(req.headers.authorization) {
+            const [type, token] = await req.headers.authorization.split(" ");
+            const payload = await jwt.decode(token);
+            const userId = payload.id
+            const postFound = await db.Post.findOne({_id: req.params.id})
+
+            if (userId === postFound.customer.toString()) {
+                console.log('we have a match')
+                await db.Post.deleteOne({ _id: postFound._id})
+                res.json({message: 'Post has been deleted'})
+
+            } else {
+                res.json({ message: "You do not have permission to delete this post"})
+            }
+        } else {
+            res.json({ message: "You must be logged in to delete a post you own"})
+        }
+    } catch(error) {
+        console.error(error);
+        res.status(400).json({
+            success: false,
+            message: "Error - Unable to delete this post"
+        })
+    }
+}
 // adding a new comment *******************
 const addNewComment = async (req, res) => {
   const { header, content } = req.body; // destructured comment content
@@ -130,7 +159,7 @@ const addNewComment = async (req, res) => {
       const payload = await jwt.decode(token);
       const authorId = payload.id;
       const commentAuthor = await db.User.find({ _id: authorId });
-      const postId = req.params.pId;
+      const postId = req.params.id;
 
       const foundPost = await db.Post.findOne({ _id: postId });
       if (!foundPost) throw new Error("Sorry this post doesn't exist");
@@ -165,4 +194,5 @@ module.exports = {
   createPost,
   addNewComment,
   showPost,
+  deletePost,
 };
