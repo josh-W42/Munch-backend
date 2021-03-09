@@ -24,7 +24,7 @@ const test = async (req, res) => {
 const postIndex = async (req, res) => {
   try {
     const posts = await db.Post.find({});
-    res.json({ success: true, count: posts.length, results: posts });
+    res.json({ success: true, message:"All post", count: posts.length, results: posts });
   } catch (error) {
     console.error(error);
     res.status(400).json({
@@ -42,7 +42,7 @@ const showPost = async (req, res) => {
   // showing a specific post
   try {
     const post = await db.Post.findOne({ _id });
-    res.json(post);
+    res.json({ success: true, message:"Single Post", count: 1, results: post});
   } catch (error) {
     console.error(error);
     res.status(400).json({
@@ -205,6 +205,44 @@ const editComment = async (req, res) => {
   }
 };
 
+// deleting a comment *********************
+const deleteComment = async (req, res) => {
+  try {
+    console.log("delete comment route");
+    const [type, token] = await req.headers.authorization.split(" ");
+    const payload = await jwt.decode(token);
+    const userId = payload.id;
+
+    const postFound = await db.Post.findOne({ _id: req.params.id }); // finding the post where the comment we are targeting lives
+    const commentId = req.params.cid;
+    const comment = postFound.comments.id(commentId); // finding the specific comment
+
+    if (userId === comment.author.toString()) {
+      // checking if the author of the comment is the same as the current user
+
+      postFound.comments.pull(commentId)
+      await postFound.save();
+
+      res.json({
+        success: true,
+        message: "Comment has been deleted",
+        results: postFound,
+      });
+    } else {
+      res.json({
+        success: false,
+        message: "You do not have permission to delete this comment",
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({
+      success: false,
+      message: "Error - Unable to edit this comment",
+    });
+  }
+};
+
 // deleting post *********************
 const deletePost = async (req, res) => {
   console.log("You are trying to delete something");
@@ -278,13 +316,16 @@ const addNewComment = async (req, res) => {
 // export all route functions
 module.exports = {
   test,
-  postIndex,
   showPost,
+  postIndex,
   postIndexAuthor,
   postIndexRestaurant,
   createPost,
+  updatePost,
+  deletePost,
   addNewComment,
   editComment,
-  deletePost,
-  updatePost,
+  deleteComment,
+
+ 
 };
