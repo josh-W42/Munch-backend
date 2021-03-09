@@ -23,15 +23,15 @@ const test = async (req, res) => {
 // finding all post ******************
 const postIndex = async (req, res) => {
   try {
-    const allPost = await db.Post.find({});
-    res.json(allPost);
+    const posts = await db.Post.find({});
+    res.json({ success: true, count: posts.length, results: posts });
   } catch (error) {
     console.error(error);
     res.status(400).json({
       success: false,
       message: "Could not GET all posts!",
       count: 0,
-      results: [],
+      return: []
     });
   }
 };
@@ -47,7 +47,7 @@ const showPost = async (req, res) => {
     console.error(error);
     res.status(400).json({
       success: false,
-      message: "Post does not exist",
+      message: "Post does not exist, sorry",
     });
   }
 };
@@ -57,8 +57,9 @@ const postIndexAuthor = async (req, res) => {
   const _id = req.params.id;
 
   try {
-    const post = await db.Post.find({ customer: _id });
-    res.json(post);
+    const posts = await db.Post.find({ customer: _id });
+
+    res.json({ success: true, message: "Here are all posts by this user", count: posts.length, results: posts });
   } catch (error) {
     console.error(error);
     res.status(400).json({
@@ -73,8 +74,8 @@ const postIndexRestaurant = async (req, res) => {
   const _id = req.params.id;
 
   try {
-    const post = await db.Post.find({ restaurant: _id });
-    res.json(post);
+    const posts = await db.Post.find({ restaurant: _id });
+    res.json({ success: true, message: "Here are all post related to this restaurant", count: posts.length, results: posts });
   } catch (error) {
     console.error(error);
     res.status(400).json({
@@ -122,8 +123,6 @@ const createPost = async (req, res) => {
 
 // updating post *********************
 const updatePost = async (req, res) => {
-    const { title, content, postImg } = req.body // updated post information
-
     try {
         if(req.headers.authorization) {
             const [type, token] = await req.headers.authorization.split(" ");
@@ -134,9 +133,10 @@ const updatePost = async (req, res) => {
             if (userId === postFound.customer.toString()) {
                 console.log('we have a match')
                 if (req.body.title) postFound.title = req.body.title;
-                if (req.body.body) postFound.content = req.body.content;
+                if (req.body.content) postFound.content = req.body.content;
                 if (req.body.postImg) postFound.postImg = req.body.postImg;
-                res.json({message: 'Post has been updated'})
+                await postFound.save()
+                res.json({ success: true, message:"Post has been updated", results: postFound })
 
             } else {
                 res.json({ message: "You do not have permission to update this post"})
@@ -165,15 +165,15 @@ const deletePost = async (req, res) => {
             const postFound = await db.Post.findOne({_id: req.params.id})
 
             if (userId === postFound.customer.toString()) {
-                console.log('we have a match')
+
                 await db.Post.deleteOne({ _id: postFound._id})
-                res.json({message: 'Post has been deleted'})
+                res.json({ success: "true", message: 'Post has been deleted'})
 
             } else {
-                res.json({ message: "You do not have permission to delete this post"})
+                res.json({ success: "false", message: "You do not have permission to delete this post"})
             }
         } else {
-            res.json({ message: "You must be logged in to delete a post you own"})
+            res.json({ success: "false", message: "You must be logged in to delete a post you own"})
         }
     } catch(error) {
         console.error(error);
@@ -224,11 +224,11 @@ const addNewComment = async (req, res) => {
 module.exports = {
   test,
   postIndex,
+  showPost,
   postIndexAuthor,
   postIndexRestaurant,
   createPost,
   addNewComment,
-  showPost,
   deletePost,
   updatePost,
 };
