@@ -95,6 +95,7 @@ const login = async (req, res) => {
       id: findUser.id,
       email: findUser.email,
       userName: findUser.userName,
+      type: "user",
     };
 
     jwt.sign(payload, JWT_SECRET, { expiresIn: 3600 }, (error, token) => {
