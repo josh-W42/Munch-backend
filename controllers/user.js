@@ -9,6 +9,11 @@ const { JWT_SECRET } = process.env;
 // Data base
 const db = require("../models");
 
+// Cloudinary
+const multer = require('multer');
+const uploads = multer({ dest: './uploads' });
+const cloudinary = require('cloudinary');
+
 // basic test
 const test = async (req, res) => {
   // How to structure and decode a token from authorization
@@ -41,6 +46,8 @@ const register = async (req, res) => {
       password,
       firstName,
       lastName,
+      profileImg: "",
+      coverImg: "",
       followers: [],
       following: [],
       favorites: [],

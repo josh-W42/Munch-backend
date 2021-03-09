@@ -25,6 +25,12 @@ const userSchema = new mongoose.Schema(
       minLength: 8,
       required: true,
     },
+    profileImg: {
+      type: String,
+    },
+    coverImg: {
+      type: String,
+    },
     favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: "Restaurant" }],
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // idk if this works
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // idk if this works
