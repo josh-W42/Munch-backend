@@ -1,7 +1,6 @@
 // imports
 require("dotenv").config();
-
-// Not too sure if we'll need bcrypt and jwt
+const passport = require("passport");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = process.env;
@@ -11,7 +10,14 @@ const db = require("../models");
 
 // basic test
 const test = async (req, res) => {
-  res.json({ message: "User endpoint OK!" });
+  // How to structure and decode a token from authorization
+  if (req.headers.authorization) {
+    const [type, token] = req.headers.authorization.split(" ");
+    const payload = jwt.decode(token);
+    res.json({ authorized: true, payload });
+  } else {
+    res.json({ authorized: false });
+  }
 };
 
 // finding all post ******************
@@ -81,28 +87,30 @@ const postIndexRestaurant = async (req, res) => {
 // creating post *********************
 const createPost = async (req, res) => {
   const { title, body, postImg } = req.body; // destructured post content
-  // postImg is an array of pictures
-  // totalSpent ? - might have to add sum of menuItem.price?
-
-  // finding user and retaurant being referenced
-  const userId = req.params.uId;
-  const restaurantId = req.params.rId;
-
   try {
-    const postUser = await db.User.findOne({ _id: userId });
-    if (!postUser) throw new Error("User Does Not Exist.");
-    const postRestaurant = await db.Restaurant.findOne({ _id: restaurantId });
-    if (!postRestaurant) throw new Error("Restaurant Does Not Exist.");
+    if (req.headers.authorization) {
+      const [type, token] = await req.headers.authorization.split(" ");
+      const payload = await jwt.decode(token);
+      const userId = payload.id;
+      const restaurantId = req.params.rId;
 
-    //create new post, no comments yet
-    const newPost = await db.Post.create({
-      title,
-      body,
-      postImg,
-      customer: postUser,
-      restaurant: postRestaurant,
-    });
-    res.json(newPost);
+      const postUser = await db.User.findOne({ _id: userId });
+      if (!postUser) throw new Error("User Does Not Exist.");
+      const postRestaurant = await db.Restaurant.findOne({ _id: restaurantId });
+      if (!postRestaurant) throw new Error("Restaurant Does Not Exist.");
+
+      //create new post, no comments yet
+      const newPost = await db.Post.create({
+        title,
+        body,
+        postImg,
+        customer: postUser,
+        restaurant: postRestaurant,
+      });
+      res.json(newPost);
+    } else {
+      res.json({ message: 'Please login to post' });
+    }
   } catch (error) {
     console.error(error);
     res.status(400).json({
@@ -114,37 +122,36 @@ const createPost = async (req, res) => {
 
 // adding a new comment *******************
 const addNewComment = async (req, res) => {
-  console.log("ADDING NEW COMMENT ROUTE");
-  // finding author of comment
-  // instead of linking an author to a user - we can make this an input field as well?
-  const authorId = req.params.uId;
+  const { header, content } = req.body; // destructured comment content
 
   try {
-    const commentAuthor = await db.User.find({ _id: authorId });
+    if (req.headers.authorization) {
+      const [type, token] = await req.headers.authorization.split(" ");
+      const payload = await jwt.decode(token);
+      const authorId = payload.id;
+      const commentAuthor = await db.User.find({ _id: authorId });
+      const postId = req.params.pId;
 
-    const { header, content } = req.body; // destructured comment content
+      const foundPost = await db.Post.findOne({ _id: postId });
+      if (!foundPost) throw new Error("Sorry this post doesn't exist");
 
-    //find a post
-    const postId = req.params.pId;
-    const foundPost = await db.Post.findOne({ _id: postId });
-    if (!foundPost) throw new Error("Sorry this post doesn't exist");
-    //use mongooses push method on foundPost.comments
-    foundPost.comments.push({
-      author: commentAuthor,
-      header,
-      content,
-      date: new Date(),
-    });
+      foundPost.comments.push({
+        author: commentAuthor,
+        header,
+        content,
+        date: new Date(),
+      });
 
-    //save it - this takes time .save()
-    await foundPost.save();
-
-    res.json(foundPost);
+      await foundPost.save();
+      res.json(foundPost);
+    } else {
+        res.json({message: 'Please login to comment'})
+    }
   } catch (error) {
     console.error(error);
     res.status(400).json({
       success: false,
-      message: "Unable to app this comment",
+      message: "Unable to add this comment",
     });
   }
 };
