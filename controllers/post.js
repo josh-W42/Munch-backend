@@ -326,6 +326,4 @@ module.exports = {
   addNewComment,
   editComment,
   deleteComment,
-
- 
 };
