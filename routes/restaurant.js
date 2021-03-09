@@ -1,6 +1,8 @@
 const router = require("express").Router();
 const ctrl = require("../controllers");
 const passport = require("passport");
+const multer = require("multer");
+const uploads = multer({ dest: "./uploads" });
 
 router.get("/test", ctrl.restaurant.test);
 router.get("/all", ctrl.restaurant.all);
