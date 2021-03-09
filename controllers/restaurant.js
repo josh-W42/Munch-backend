@@ -169,6 +169,42 @@ const remove = async (req, res) => {
   }
 };
 
+// Route to add to Restaurant Menu
+const addMenuItem = async (req, res) => {
+  console.log('adding menu item route')
+  const _id = req.params.id;
+  try {
+    const [type, token] = req.headers.authroization.split(" ");
+    const payload = jwt.decode(token);
+    if (payload.id !== _id) throw new Error("Not your menu")
+
+    // find the restaurant
+    const restaurant = await db.Restaurant.findOne({ _id })
+    const { name, description, imgUrl, price, itemType } = req.body
+
+    restaurant.menu.push({
+      name,
+      description,
+      imgUrl,
+      price,
+      type: itemType
+    });
+
+    await restaurant.save();
+    res.json({ 
+      success: true, 
+      message: "Menu item added!", 
+      menuCount: restaurant.menu.length, 
+      results: restaurant})
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({
+      success: false,
+      message: "Unable to add to the menu"
+    })
+  }
+} 
+
 // export all route functions
 module.exports = {
   test,
@@ -177,4 +213,5 @@ module.exports = {
   profile,
   all,
   remove,
+  addMenuItem,
 };
