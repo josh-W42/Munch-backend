@@ -15,6 +15,18 @@ router.put(
   ctrl.user.edit
 );
 router.put(
+  "/:id/profileImg",
+  passport.authenticate("jwt", { session: false }),
+  uploads.single('profileImg'),
+  ctrl.user.changeProfileImg
+);
+router.put(
+  "/:id/coverImg",
+  passport.authenticate("jwt", { session: false }),
+  uploads.single('coverImg'),
+  ctrl.user.changeCoverImg
+);
+router.put(
   "/addFavorite/:restaurantId",
   passport.authenticate("jwt", { session: false }),
   ctrl.user.addFavorite

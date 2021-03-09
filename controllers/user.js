@@ -30,12 +30,6 @@ const register = async (req, res) => {
 
   // check if an email or username already exists
   try {
-    const users = await db.User.find({
-      $or: [{ email }, { userName }],
-    });
-
-    // But What about mongo validation? we could use the unique: true
-    if (users.length > 0) throw new Error("Username or Email already exists");
 
     // Create a new user.
     const newUser = await db.User.create({
@@ -67,7 +61,19 @@ const register = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(400).json({ success: false, message: error.message });
+    if (error.name === 'MongoError') {
+      const needToChange = error.keyPattern;
+      res.status(409).json({
+        success: false,
+        message: "Database Error",
+        needToChange
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
   }
 };
 
@@ -194,6 +200,13 @@ const edit = async (req, res) => {
         success: false,
         message: "You Must Be logged In As That User To Do That",
       });
+    } else if (error.name === 'MongoError') {
+      const needToChange = error.keyPattern;
+      res.status(409).json({
+        success: false,
+        message: "DataBase Error",
+        needToChange
+      });
     } else {
       res.status(400).json({
         success: false,
@@ -202,6 +215,96 @@ const edit = async (req, res) => {
     }
   }
 }
+
+// Change Profile Picture
+const changeProfileImg = async (req, res) => {
+  const _id = req.params.id;
+  try {
+    // find the current user
+    const [type, token] = req.headers.authorization.split(" ");
+    const payload = jwt.decode(token);
+    // check if the user is editing only themselves
+    if (payload.id !== _id) throw new Error("Forbidden");
+
+    // get the user
+    const user = await db.User.findOne({ _id });
+
+    // First see if you can process the image.
+    // Check if user inputed an image.
+    let profileUrl = user.profileImg;
+    if (req.file) {
+      let image = req.file.path;
+      try {
+        const result = await cloudinary.uploader.upload(image);
+        profileUrl = result.secure_url;
+      } catch (error) {
+        throw new Error("Could Not Upload To Cloudinary");
+      }
+    }
+
+    user.profileImg = profileUrl;
+    await user.save();
+    res.json({ success: true, message: "Profile Picture Successfuly Changed" });
+  } catch (error) {
+    console.error(error);
+    if (error.message === "Forbidden") {
+      res.status(403).json({
+        success: false,
+        message: "You Must Be logged In As That User To Do That",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+};
+
+// Change Cover Photo
+const changeCoverImg = async (req, res) => {
+  const _id = req.params.id;
+  try {
+    // find the current user
+    const [type, token] = req.headers.authorization.split(" ");
+    const payload = jwt.decode(token);
+    // check if the user is editing only themselves
+    if (payload.id !== _id) throw new Error("Forbidden");
+
+    // get the user
+    const user = await db.User.findOne({ _id });
+
+    // First see if you can process the image.
+    // Check if user inputed an image.
+    let coverUrl = user.coverImg;
+    if (req.file) {
+      let image = req.file.path;
+      try {
+        const result = await cloudinary.uploader.upload(image);
+        coverUrl = result.secure_url;
+      } catch (error) {
+        throw new Error("Could Not Upload To Cloudinary");
+      }
+    }
+
+    user.coverImg = coverUrl;
+    await user.save();
+    res.json({ success: true, message: "Cover Picture Successfuly Changed" });
+  } catch (error) {
+    console.error(error);
+    if (error.message === "Forbidden") {
+      res.status(403).json({
+        success: false,
+        message: "You Must Be logged In As That User To Do That",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+};
 
 // Route to Delete a User
 const remove = async (req, res) => {
@@ -275,4 +378,6 @@ module.exports = {
   edit,
   remove,
   addFavorite,
+  changeProfileImg,
+  changeCoverImg,
 };

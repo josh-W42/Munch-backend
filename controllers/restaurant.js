@@ -9,8 +9,6 @@ const { JWT_SECRET } = process.env;
 const db = require("../models");
 
 // Cloudinary
-const multer = require('multer');
-const uploads = multer({ dest: './uploads' });
 const cloudinary = require('cloudinary');
 
 // basic test
@@ -24,8 +22,6 @@ const register = async (req, res) => {
 
   // Ok so this is when do things like check if an email or name already exists
   try {
-    const restaurants = await db.Restaurant.find({ email });
-    if (restaurants.length > 0) throw new Error("Email already exists");
 
     // Find the category
     const foundCategory = await db.Category.findOne({ name: category });
@@ -62,7 +58,19 @@ const register = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(400).json({ success: false, message: error.message });
+    if (error.name === 'MongoError') {
+      const needToChange = error.keyPattern;
+      res.status(409).json({
+        success: false,
+        message: "Database Error",
+        needToChange
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
   }
 };
 
