@@ -12,6 +12,18 @@ router.put(
   passport.authenticate("jwt", { session: false }),
   ctrl.restaurant.edit
 );
+router.put(
+  "/:id/profileImg",
+  passport.authenticate("jwt", { session: false }),
+  uploads.single('profileImg'),
+  ctrl.restaurant.changeProfileImg
+);
+router.put(
+  "/:id/coverImg",
+  passport.authenticate("jwt", { session: false }),
+  uploads.single('coverImg'),
+  ctrl.restaurant.changeCoverImg
+);
 router.delete(
   "/:id/delete",
   passport.authenticate("jwt", { session: false }),

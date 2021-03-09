@@ -222,6 +222,96 @@ const edit = async (req, res) => {
   }
 };
 
+// Change Profile Picture
+const changeProfileImg = async (req, res) => {
+  const _id = req.params.id;
+  try {
+    // find the current restaurant
+    const [type, token] = req.headers.authorization.split(" ");
+    const payload = jwt.decode(token);
+    // check if the restaurant is editing only themselves
+    if (payload.id !== _id) throw new Error("Forbidden");
+
+    // get the restaurant
+    const restaurant = await db.Restaurant.findOne({ _id });
+
+    // First see if you can process the image.
+    // Check if restaurant inputed an image.
+    let profileUrl = restaurant.profileImg;
+    if (req.file) {
+      let image = req.file.path;
+      try {
+        const result = await cloudinary.uploader.upload(image);
+        profileUrl = result.secure_url;
+      } catch (error) {
+        throw new Error("Could Not Upload To Cloudinary");
+      }
+    }
+
+    restaurant.profileImg = profileUrl;
+    await restaurant.save();
+    res.json({ success: true, message: "Profile Picture Successfuly Changed" });
+  } catch (error) {
+    console.error(error);
+    if (error.message === "Forbidden") {
+      res.status(403).json({
+        success: false,
+        message: "You Must Be logged In As That restaurant To Do That",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+};
+
+// Change Cover Photo
+const changeCoverImg = async (req, res) => {
+  const _id = req.params.id;
+  try {
+    // find the current restaurant
+    const [type, token] = req.headers.authorization.split(" ");
+    const payload = jwt.decode(token);
+    // check if the restaurant is editing only themselves
+    if (payload.id !== _id) throw new Error("Forbidden");
+
+    // get the restaurant
+    const restaurant = await db.Restaurant.findOne({ _id });
+
+    // First see if you can process the image.
+    // Check if restaurant inputed an image.
+    let coverUrl = restaurant.coverImg;
+    if (req.file) {
+      let image = req.file.path;
+      try {
+        const result = await cloudinary.uploader.upload(image);
+        coverUrl = result.secure_url;
+      } catch (error) {
+        throw new Error("Could Not Upload To Cloudinary");
+      }
+    }
+
+    restaurant.coverImg = coverUrl;
+    await restaurant.save();
+    res.json({ success: true, message: "Cover Picture Successfuly Changed" });
+  } catch (error) {
+    console.error(error);
+    if (error.message === "Forbidden") {
+      res.status(403).json({
+        success: false,
+        message: "You Must Be logged In As That restaurant To Do That",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+};
+
 // Route to Delete a Restaurant
 const remove = async (req, res) => {
   const _id = req.params.id;
@@ -262,4 +352,6 @@ module.exports = {
   all,
   remove,
   edit,
+  changeProfileImg,
+  changeCoverImg,
 };
