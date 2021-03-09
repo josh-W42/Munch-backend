@@ -379,6 +379,36 @@ const addMenuItem = async (req, res) => {
   }
 } 
 
+// Route to delete a Menu Item
+const deleteMenuItem = async (req, res) => {
+  
+  const _id = req.params.id;
+  const menuItemId = req.params.itemid;
+
+  try {
+    const [type, token] = req.headers.authorization.split(" ");
+    const payload = jwt.decode(token);
+    if (payload.id !== _id) throw new Error("Not your menu")
+
+    // find the restaurant
+    const restaurant = await db.Restaurant.findOne({ _id })
+    // deleting the menu item
+    const item = restaurant.menu.pull(menuItemId)
+
+    await restaurant.save();
+    res.json({ 
+      success: true, 
+      message: "Menu item deleted!", 
+      menuCount: restaurant.menu.length, 
+      results: restaurant})
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({
+      success: false,
+      message: "Unable to delete the menu item"
+    })
+  }
+} 
 // Route to edit a Menu Item
 const editMenuItem = async (req, res) => {
   
@@ -428,6 +458,7 @@ module.exports = {
   edit,
   changeProfileImg,
   changeCoverImg,
-  editMenuItem
+  editMenuItem,
+  deleteMenuItem,
 
 };

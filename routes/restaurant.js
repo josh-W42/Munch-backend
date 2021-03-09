@@ -35,6 +35,12 @@ router.delete(
   passport.authenticate("jwt", { session: false }),
   ctrl.restaurant.remove
 );
+router.delete(
+  "/:id/:itemid/delete",
+  passport.authenticate("jwt", { session: false}),
+  ctrl.restaurant.deleteMenuItem
+
+)
 
 
 module.exports = router;
