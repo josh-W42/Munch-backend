@@ -27,7 +27,10 @@ const restaurantSchema = new mongoose.Schema(
       required: true,
     },
     // location: null, null for now
-    imgUrl: {
+    profileUrl: {
+      type: String,
+    },
+    coverUrl: {
       type: String,
     },
     // embedded

@@ -8,6 +8,11 @@ const { JWT_SECRET } = process.env;
 // Data base
 const db = require("../models");
 
+// Cloudinary
+const multer = require('multer');
+const uploads = multer({ dest: './uploads' });
+const cloudinary = require('cloudinary');
+
 // basic test
 const test = async (req, res) => {
   res.json({ message: "Restaurants endpoint OK!" });
@@ -31,7 +36,8 @@ const register = async (req, res) => {
       name,
       email,
       password,
-      imgUrl: "",
+      profileImg: "",
+      coverImg: "",
       menu: [],
       category: [foundCategory],
     });
