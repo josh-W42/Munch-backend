@@ -113,15 +113,14 @@ const login = async (req, res) => {
 };
 
 // Get Profile information
-const profile = async (req, res) => {
+const publicInfo = async (req, res) => {
   const _id = req.params.id;
   // Find a user with that id
   try {
-    const user = await db.User.findOne({ _id });
+    const user = await db.User.findOne({ _id }).select('-password -email -firstName -lastName');
     // If it doesn't exist, throw an error
     if (!user) throw new Error("User Does Not Exist.");
-    // Remove password.
-    user.password = "";
+
     res.json({ success: true, user });
   } catch (error) {
     console.error(error);
@@ -129,11 +128,40 @@ const profile = async (req, res) => {
   }
 };
 
+const privateInfo = async (req, res) => {
+  const _id = req.params.id;
+  try {
+    // Only give private information to a logged in user.
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+    // check if the user is viewing only themselves
+    if (payload.id !== _id) throw new Error("Forbidden");
+
+    // If yes, retreive and send
+    const user = await db.User.findOne({ _id }).select('-password');
+
+    res.json({ success: true, user });
+  } catch (error) {
+    console.error(error);
+    if (error.message === "Forbidden") {
+      res.status(403).json({
+        success: false,
+        message: "You Must Be logged In As That User To Do That.",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+}
+
 // Get All user Info information
 const all = async (req, res) => {
   // Find All with that id
   try {
-    let users = await db.User.find({}).select('-password');
+    let users = await db.User.find({}).select('-password -email -firstName -lastName');
     res.json({ success: true, count: users.length, results: users });
   } catch (error) {
     console.error(error);
@@ -369,16 +397,56 @@ const addFavorite = async (req, res) => {
   }
 }
 
+// Route To Follow Someone Else
+const follow = async (req, res) => {
+  const otherId = req.params.otherId;
+  try {
+    // find "viewing" user
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+    const viewer = await db.User.findOne({ _id: payload.id });
+    
+    // find the "other" user
+    const otherUser = await db.User.findOne({ _id: otherId });
+    if (!otherUser) throw new Error(`The User You're attempting To Follow Does Not Exist.`);
+    
+    // Check the follow status
+    if (viewer.following.includes(otherUser.id)) throw new Error(`You're Already Following That User.`);
+    
+    // Viewer now follows otherUser
+    viewer.following.push(otherUser._id);
+    await viewer.save();
+
+    // OtherUser now has a follower
+    otherUser.followers.push(viewer._id);
+    await otherUser.save();
+
+
+    res.json({
+      success: true,
+      message: "Successfully Followed User"
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}
+
 // export all route functions
 module.exports = {
   test,
   register,
   login,
-  profile,
+  publicInfo,
+  privateInfo,
   all,
   edit,
   remove,
   addFavorite,
   changeProfileImg,
   changeCoverImg,
+  follow,
 };
