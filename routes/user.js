@@ -12,8 +12,10 @@ router.get(
   passport.authenticate("jwt", { session: false }),
   ctrl.user.privateInfo
 );
+
 router.post("/register", ctrl.user.register);
 router.post("/login", ctrl.user.login);
+
 router.put(
   "/:id/edit",
   passport.authenticate("jwt", { session: false }),
@@ -41,6 +43,12 @@ router.put(
   passport.authenticate("jwt", { session: false }),
   ctrl.user.follow
 );
+router.put(
+  "/unfollow/:otherId",
+  passport.authenticate("jwt", { session: false }),
+  ctrl.user.unFollow
+);
+
 router.delete(
   "/:id/delete",
   passport.authenticate("jwt", { session: false }),

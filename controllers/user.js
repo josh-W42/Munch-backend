@@ -449,21 +449,19 @@ const unFollow = async (req, res) => {
     if (!otherUser) throw new Error(`The User You're attempting To Unfollow Does Not Exist.`);
     
     // Check the follow status
-    const followIndex = viewer.following.indexOf(otherUser.id);
     if (!viewer.following.includes(otherUser.id)) throw new Error(`You're Not Following That User.`);
     
-    // Viewer now follows otherUser
-    viewer.following.splice();
+    // Viewer now doesn't follow otherUser
+    viewer.following.pull(otherUser._id);
     await viewer.save();
 
-    // OtherUser now has a follower
-    otherUser.followers.push(viewer._id);
+    // OtherUser now doesn't have a follower
+    otherUser.followers.pull(viewer._id);
     await otherUser.save();
-
 
     res.json({
       success: true,
-      message: "Successfully Followed User"
+      message: "Successfully Unfollowed User"
     });
   } catch (error) {
     console.error(error);
