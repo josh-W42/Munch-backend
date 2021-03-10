@@ -6,7 +6,12 @@ const uploads = multer({ dest: "./uploads" });
 
 router.get("/test", ctrl.restaurant.test);
 router.get("/all", ctrl.restaurant.all);
-router.get("/:id", ctrl.restaurant.profile);
+router.get("/:id/public", ctrl.restaurant.publicInfo);
+router.get(
+  "/:id/private",
+  passport.authenticate("jwt", { session: false }),
+  ctrl.restaurant.privateInfo
+);
 router.post("/register", ctrl.restaurant.register);
 router.post("/login", ctrl.restaurant.login);
 router.put(

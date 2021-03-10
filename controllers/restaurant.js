@@ -110,21 +110,51 @@ const login = async (req, res) => {
 };
 
 // Get Profile information
-const profile = async (req, res) => {
+const publicInfo = async (req, res) => {
   const _id = req.params.id;
   // Find a user with that id
   try {
-    const restaurant = await db.Restaurant.findOne({ _id });
+    const restaurant = await db.Restaurant.findOne({ _id }).select('-password -email -coverImg');
     // If it doesn't exist, throw an error
     if (!restaurant) throw new Error("Restaurant Does Not Exist.");
-    // Remove password.
-    restaurant.password = "";
+
     res.json({ success: true, restaurant });
   } catch (error) {
     console.error(error);
     res
       .status(400)
       .json({ success: false, message: "Restaurant Does Not Exist" });
+  }
+};
+
+const privateInfo = async (req, res) => {
+  const _id = req.params.id;
+  // Find a user with that id
+  try {
+    // Only give private information to a logged in restaurant.
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+    // check if the restaurant is viewing only themselves
+    if (payload.id !== _id) throw new Error("Forbidden");
+
+    const restaurant = await db.Restaurant.findOne({ _id }).select('-password');
+    // If it doesn't exist, throw an error
+    if (!restaurant) throw new Error("Restaurant Does Not Exist.");
+
+    res.json({ success: true, restaurant });
+  } catch (error) {
+    console.error(error);
+    if (error.message === "Forbidden") {
+      res.status(403).json({
+        success: false,
+        message: "You Must Be logged In As That User To Do That.",
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
   }
 };
 
@@ -348,7 +378,8 @@ module.exports = {
   test,
   register,
   login,
-  profile,
+  publicInfo,
+  privateInfo,
   all,
   remove,
   edit,
