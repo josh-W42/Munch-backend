@@ -20,12 +20,12 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   ctrl.restaurant.addMenuItem
 );
-
 router.put(
   "/:id/:itemid/editMenuItem",
   passport.authenticate("jwt", { session: false }),
   ctrl.restaurant.editMenuItem
 );
+
 router.put(
   "/:id/edit",
   passport.authenticate("jwt", { session: false }),
