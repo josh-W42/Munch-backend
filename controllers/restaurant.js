@@ -132,7 +132,7 @@ const profile = async (req, res) => {
 const all = async (req, res) => {
   // Find All with that id
   try {
-    let restaurants = await db.Restaurant.find({}).select('-password');
+    let restaurants = await db.Restaurant.find({}).select('-password -email -coverImg');
     res.json({ success: true, count: restaurants.length, results: restaurants });
   } catch (error) {
     console.error(error);

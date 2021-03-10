@@ -133,7 +133,7 @@ const profile = async (req, res) => {
 const all = async (req, res) => {
   // Find All with that id
   try {
-    let users = await db.User.find({}).select('-password');
+    let users = await db.User.find({}).select('-password -email -firstName -lastName -coverImg');
     res.json({ success: true, count: users.length, results: users });
   } catch (error) {
     console.error(error);
