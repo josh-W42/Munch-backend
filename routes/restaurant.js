@@ -14,6 +14,10 @@ router.get(
 );
 router.post("/register", ctrl.restaurant.register);
 router.post("/login", ctrl.restaurant.login);
+
+router.post("/:id/addMenuItem", passport.authenticate('jwt', { session: false }), ctrl.restaurant.addMenuItem)
+router.put("/:id/:itemid/editMenuItem", passport.authenticate('jwt', { session: false}), ctrl.restaurant.editMenuItem)
+
 router.put(
   "/:id/edit",
   passport.authenticate("jwt", { session: false }),
@@ -36,5 +40,12 @@ router.delete(
   passport.authenticate("jwt", { session: false }),
   ctrl.restaurant.remove
 );
+router.delete(
+  "/:id/:itemid/delete",
+  passport.authenticate("jwt", { session: false}),
+  ctrl.restaurant.deleteMenuItem
+
+)
+
 
 module.exports = router;
