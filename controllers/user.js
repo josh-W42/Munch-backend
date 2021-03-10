@@ -38,8 +38,8 @@ const register = async (req, res) => {
       password,
       firstName,
       lastName,
-      profileImg: "",
-      coverImg: "",
+      profileUrl: "",
+      coverUrl: "",
       followers: [],
       following: [],
       favorites: [],
@@ -104,7 +104,7 @@ const login = async (req, res) => {
       // This verify method expires in 60 seconds if there is no response after attempting to verify the token
       const legit = jwt.verify(token, JWT_SECRET, { expiresIn: 60 });
 
-      res.json({ success: true, token: `Bearer ${token}`, userData: legit });
+      res.json({ success: true, token: `Bearer ${token}`, data: legit });
     });
   } catch (error) {
     console.error(error);
@@ -260,7 +260,7 @@ const changeProfileImg = async (req, res) => {
 
     // First see if you can process the image.
     // Check if user inputed an image.
-    let profileUrl = user.profileImg;
+    let profileUrl = user.profile;
     if (req.file) {
       let image = req.file.path;
       try {
@@ -271,7 +271,7 @@ const changeProfileImg = async (req, res) => {
       }
     }
 
-    user.profileImg = profileUrl;
+    user.profileUrl = profileUrl;
     await user.save();
     res.json({ success: true, message: "Profile Picture Successfuly Changed" });
   } catch (error) {
@@ -305,7 +305,7 @@ const changeCoverImg = async (req, res) => {
 
     // First see if you can process the image.
     // Check if user inputed an image.
-    let coverUrl = user.coverImg;
+    let coverUrl = user.coverUrl;
     if (req.file) {
       let image = req.file.path;
       try {
@@ -316,7 +316,7 @@ const changeCoverImg = async (req, res) => {
       }
     }
 
-    user.coverImg = coverUrl;
+    user.coverUrl = coverUrl;
     await user.save();
     res.json({ success: true, message: "Cover Picture Successfuly Changed" });
   } catch (error) {
@@ -435,6 +435,43 @@ const follow = async (req, res) => {
   }
 }
 
+// Route To unfollow Someone Else
+const unFollow = async (req, res) => {
+  const otherId = req.params.otherId;
+  try {
+    // find "viewing" user
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+    const viewer = await db.User.findOne({ _id: payload.id });
+    
+    // find the "other" user
+    const otherUser = await db.User.findOne({ _id: otherId });
+    if (!otherUser) throw new Error(`The User You're attempting To Unfollow Does Not Exist.`);
+    
+    // Check the follow status
+    if (!viewer.following.includes(otherUser.id)) throw new Error(`You're Not Following That User.`);
+    
+    // Viewer now doesn't follow otherUser
+    viewer.following.pull(otherUser._id);
+    await viewer.save();
+
+    // OtherUser now doesn't have a follower
+    otherUser.followers.pull(viewer._id);
+    await otherUser.save();
+
+    res.json({
+      success: true,
+      message: "Successfully Unfollowed User"
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}
+
 // export all route functions
 module.exports = {
   test,
@@ -449,4 +486,5 @@ module.exports = {
   changeProfileImg,
   changeCoverImg,
   follow,
+  unFollow,
 };
