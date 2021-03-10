@@ -32,8 +32,8 @@ const register = async (req, res) => {
       name,
       email,
       password,
-      profileImg: "",
-      coverImg: "",
+      profileUrl: "",
+      coverUrl: "",
       menu: [],
       category: [foundCategory],
     });
@@ -101,7 +101,7 @@ const login = async (req, res) => {
       // This verify method expires in 60 seconds if there is no response after attempting to verify the token
       const legit = jwt.verify(token, JWT_SECRET, { expiresIn: 60 });
 
-      res.json({ success: true, token: `Bearer ${token}`, RestaurantData: legit });
+      res.json({ success: true, token: `Bearer ${token}`, data: legit });
     });
   } catch (error) {
     console.error(error);
@@ -114,7 +114,7 @@ const publicInfo = async (req, res) => {
   const _id = req.params.id;
   // Find a user with that id
   try {
-    const restaurant = await db.Restaurant.findOne({ _id }).select('-password -email -coverImg');
+    const restaurant = await db.Restaurant.findOne({ _id }).select('-password -email');
     // If it doesn't exist, throw an error
     if (!restaurant) throw new Error("Restaurant Does Not Exist.");
 
@@ -162,7 +162,7 @@ const privateInfo = async (req, res) => {
 const all = async (req, res) => {
   // Find All with that id
   try {
-    let restaurants = await db.Restaurant.find({}).select('-password -email -coverImg');
+    let restaurants = await db.Restaurant.find({}).select('-password -email');
     res.json({ success: true, count: restaurants.length, results: restaurants });
   } catch (error) {
     console.error(error);
@@ -267,7 +267,7 @@ const changeProfileImg = async (req, res) => {
 
     // First see if you can process the image.
     // Check if restaurant inputed an image.
-    let profileUrl = restaurant.profileImg;
+    let profileUrl = restaurant.profileUrl;
     if (req.file) {
       let image = req.file.path;
       try {
@@ -278,7 +278,7 @@ const changeProfileImg = async (req, res) => {
       }
     }
 
-    restaurant.profileImg = profileUrl;
+    restaurant.profileUrl = profileUrl;
     await restaurant.save();
     res.json({ success: true, message: "Profile Picture Successfuly Changed" });
   } catch (error) {
@@ -312,7 +312,7 @@ const changeCoverImg = async (req, res) => {
 
     // First see if you can process the image.
     // Check if restaurant inputed an image.
-    let coverUrl = restaurant.coverImg;
+    let coverUrl = restaurant.coverUrl;
     if (req.file) {
       let image = req.file.path;
       try {
@@ -323,7 +323,7 @@ const changeCoverImg = async (req, res) => {
       }
     }
 
-    restaurant.coverImg = coverUrl;
+    restaurant.coverUrl = coverUrl;
     await restaurant.save();
     res.json({ success: true, message: "Cover Picture Successfuly Changed" });
   } catch (error) {
@@ -491,5 +491,4 @@ module.exports = {
   changeCoverImg,
   editMenuItem,
   deleteMenuItem,
-
 };
