@@ -1,7 +1,5 @@
 // imports
 require("dotenv").config();
-const passport = require("passport");
-// For now we'll use bcrypt but ill do a scrypt example too
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = process.env;

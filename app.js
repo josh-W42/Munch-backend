@@ -31,6 +31,7 @@ app.use("/api/users", routes.user);
 app.use("/api/restaurants", routes.restaurant);
 app.use("/api/posts", routes.post);
 app.use("/api/orders", routes.order);
+app.use("/api/categories", routes.category);
 
 // Server
 const server = app.listen(PORT, () =>
