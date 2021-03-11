@@ -2,19 +2,19 @@ const db = require("./models");
 
 const categories = [
   // multiple categories
-  { name: "Breakfast" },
-  { name: "Brunch" },
-  { name: "Lunch" },
-  { name: "Dinner" },
-  { name: "Ramen" },
-  { name: "Japanese" },
-  { name: "Thai" },
-  { name: "Mexican" },
-  { name: "Vegetarian" },
-  { name: "Vegan" },
-  { name: "Halal" },
-  { name: "Mediterranean" },
-  { name: "Italian" },
+  { name: "breakfast", picture: "https://res.cloudinary.com/dom5vocai/image/upload/v1615492619/fried-egg_a28qsd.png" },
+  { name: "brunch", picture: "https://res.cloudinary.com/dom5vocai/image/upload/v1615492669/cocktail_f9eb9c.png" },
+  { name: "lunch", picture: "https://res.cloudinary.com/dom5vocai/image/upload/v1615493643/cheeseburger_ugql4l.png" },
+  { name: "dinner", picture: "https://res.cloudinary.com/dom5vocai/image/upload/v1615493350/food-tray_azcja1.png" },
+  { name: "ramen", picture: "https://res.cloudinary.com/dom5vocai/image/upload/v1615492635/ramen_gqml0y.png" },
+  { name: "japanese", picture: "https://res.cloudinary.com/dom5vocai/image/upload/v1615492661/onigiri_cgfvga.png" },
+  { name: "thai", picture: "https://res.cloudinary.com/dom5vocai/image/upload/v1615493359/curry_cbxvke.png" },
+  { name: "mexican", picture: "https://res.cloudinary.com/dom5vocai/image/upload/v1615492648/taco_qfobgo.png" },
+  { name: "vegetarian", picture: "https://res.cloudinary.com/dom5vocai/image/upload/v1615493595/carrot_xwimty.png" },
+  { name: "vegan", picture: "https://res.cloudinary.com/dom5vocai/image/upload/v1615493194/salad_1_a8ekmc.png" },
+  { name: "halal", picture: "https://res.cloudinary.com/dom5vocai/image/upload/v1615493185/falafel_misghn.png" },
+  { name: "mediterranean", picture: "https://res.cloudinary.com/dom5vocai/image/upload/v1615493496/sandwich_kdw1yu.png" },
+  { name: "italian", picture: "https://res.cloudinary.com/dom5vocai/image/upload/v1615493545/pasta_u66jrx.png" },
 ];
 
 const addManyCategories = async () => {
@@ -35,7 +35,7 @@ const oneRestaurant = {
   name: `Shin-Sen-Gumi`,
   email: "ShinSenGumi@gmail.com",
   password: "password",
-  profileUrl: "https://shinsengumigroup.com/",
+  profileUrl: "https://res.cloudinary.com/dom5vocai/image/upload/v1614931585/oi0yvlmmt9xtoxzzpj5t.jpg",
   menu: [
     {
       name: "Tonkotsu Ramen",
