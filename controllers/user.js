@@ -395,7 +395,7 @@ const addFavorite = async (req, res) => {
     if (!restaurant) throw new Error('No Restaurant Found');
 
     // Add a user favorite
-    user.favorites = user.favorites.concat([restaurant]);
+    user.favorites = user.favorites.push(restaurant);
     await user.save();
 
     res.json({ success: true, message: 'Restaurant Saved To Favorites' });
@@ -407,6 +407,35 @@ const addFavorite = async (req, res) => {
       message: error.message
     });
   }
+}
+
+const removeFavorite = async (req, res) => {
+  const restaurantId = req.params.restaurantId;
+  try {
+    // First, get the userId
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+    const userId = payload.id
+
+    const user = await db.User.findOne({ _id: userId });
+
+    // Then find the restaurant
+    const restaurant = await db.Restaurant.findOne({ _id: restaurantId});
+    if (!restaurant) throw new Error('No Restaurant Found');
+
+    // Add a user favorite
+    user.favorites = user.favorites.pull(restaurant);
+    await user.save();
+
+    res.json({ success: true, message: 'Restaurant Removed From Favorites' });
+
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }  
 }
 
 // Route To Follow Someone Else
@@ -495,6 +524,7 @@ module.exports = {
   edit,
   remove,
   addFavorite,
+  removeFavorite,
   changeProfileImg,
   changeCoverImg,
   follow,
