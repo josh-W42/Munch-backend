@@ -34,7 +34,7 @@ app.get("/api/find", (req, res) => {
   try {
     if (!query) throw new Error('Empty Search');
     
-    const results = Trie.findSuffixes(query);
+    const results = Trie.findSuffixes(query.toLowerCase());
     if (results === -1) {
       res.json({ success: true, results: [], count: 0, message: "OK Search, Nothing Found"});
     } else {
