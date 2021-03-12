@@ -39,6 +39,11 @@ router.put(
   ctrl.user.addFavorite
 );
 router.put(
+  "/removeFavorite/:restaurantId",
+  passport.authenticate("jwt", { session: false }),
+  ctrl.user.removeFavorite
+);
+router.put(
   "/follow/:otherId",
   passport.authenticate("jwt", { session: false }),
   ctrl.user.follow
