@@ -3,6 +3,7 @@ require("dotenv").config();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = process.env;
+const { Trie } = require('../seed');
 
 // Data base
 const db = require("../models");
@@ -52,6 +53,10 @@ const register = async (req, res) => {
 
         newUser.password = hash;
         const createdUser = await newUser.save();
+
+        // add the new username to autocomplete index
+        Trie.addWord(userName.toLowerCase(), "user");
+
         res
           .status(201)
           .json({ success: true, user: createdUser, message: "User Created" });
@@ -344,11 +349,20 @@ const remove = async (req, res) => {
     // check if user is deleting only themselves
     if (payload.id !== _id) throw new Error("Forbidden");
 
-    await db.User.deleteOne({ _id });
+    const user = await db.User.findOne({ _id });
+    
+    // remove from auto complete indexing
+    Trie.deleteWord(user.userName);
+
+    // then delete from db
+    await user.delete();
+
     res.status(200).json({
       success: true,
       message: "User Deleted",
     });
+
+
   } catch (error) {
     console.error(error);
     if (error.message === "Forbidden") {

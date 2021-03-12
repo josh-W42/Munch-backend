@@ -17,21 +17,30 @@ const categories = [
   { name: "halal", picture: "https://res.cloudinary.com/dom5vocai/image/upload/v1615493185/falafel_misghn.png" },
   { name: "mediterranean", picture: "https://res.cloudinary.com/dom5vocai/image/upload/v1615493496/sandwich_kdw1yu.png" },
   { name: "italian", picture: "https://res.cloudinary.com/dom5vocai/image/upload/v1615493545/pasta_u66jrx.png" },
+  { name: "chinese", picture: "https://res.cloudinary.com/dom5vocai/image/upload/v1615537862/chinese-food_hr4i8q.png" },
 ];
 
 const addManyCategories = async () => {
-  const savedExamples = await db.Category.insertMany(categories); // creating many categories
-  console.log("=======> Saved Many Categories.");
-  console.log(savedExamples);
+  try {
+    const savedExamples = await db.Category.insertMany(categories); // creating many categories  
+    console.log("=======> Saved Many Categories.");
+  } catch (error) {
+    console.error(error);
+  }
+  // console.log(savedExamples);
 };
 
-const oneCategory = { name: "Chinese" }; // single category
+// const oneCategory = { name: "Chinese" }; // single category
 
-const addOneCategory = async () => {
-  const savedOneExample = await db.Category.create(oneCategory); // creating the one category
-  console.log("=======> Saved One Category.");
-  console.log(savedOneExample);
-};
+// const addOneCategory = async () => {
+//   try {
+//     const savedOneExample = await db.Category.create(oneCategory); // creating the one category
+//     console.log("=======> Saved One Category.");
+//   } catch (error) {
+//     // Dont worry
+//   }
+//   // console.log(savedOneExample);
+// };
 
 const oneRestaurant = {
   name: `Shin-Sen-Gumi`,
@@ -61,12 +70,16 @@ const oneRestaurant = {
 };
 
 const addOneRestaurant = async () => {
-  const savedOneRestaurant = await db.Restaurant.create(oneRestaurant);
-  const japanese = await db.Category.findOne({name: "Japanese"})
-  savedOneRestaurant.category = japanese
-  savedOneRestaurant.save();
-  console.log("============> Restaurant was added to the database")
-  console.log(savedOneRestaurant)
+  try {
+    const savedOneRestaurant = await db.Restaurant.create(oneRestaurant);
+    const japanese = await db.Category.findOne({name: "japanese"});
+    savedOneRestaurant.category = japanese;
+    savedOneRestaurant.save();
+    console.log("============> Restaurant was added to the database");
+  } catch (error) {
+    // Dont worry
+  }
+  // console.log(savedOneRestaurant)
 };
 
 // Trie stuff.
@@ -76,8 +89,19 @@ const createTrie = () => {
   // first store all the categories in the trie
   const myTrie = new Trie();
   for (let category of categories) {
-    myTrie.addWord(category.name, 'category');
+    myTrie.addWord(category.name.toLowerCase(), 'category');
   }
+
+  // Then the users
+  db.User.find({})
+  .then(users => {
+    users.forEach(user => {
+      myTrie.addWord(user.userName.toLowerCase(), "user");
+    });
+  })
+  .catch(error => {
+    console.error(error);
+  });
 
   // Now store all restaurants
   db.Restaurant.find({})
@@ -111,8 +135,12 @@ const init = async () => {
   }
   
   // >>>>>>>> run the functions if needed <<<<<<<<<<<
+  try {
+    addOneRestaurant();
+  } catch (error) {
+    // Don't Worry About it.
+  }
   // addOneCategory();
-  // addOneRestaurant();
 }
 
 init();

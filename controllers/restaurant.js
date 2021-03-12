@@ -3,6 +3,7 @@ require("dotenv").config();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = process.env;
+const { Trie } = require('../seed');
 
 // Data base
 const db = require("../models");
@@ -46,6 +47,10 @@ const register = async (req, res) => {
 
         newRestaurant.password = hash;
         const createdRestaurant = await newRestaurant.save();
+
+        // add the new username to autocomplete index
+        Trie.addWord(name.toLowerCase(), "restaurant");
+
         res
           .status(201)
           .json({
@@ -159,10 +164,38 @@ const privateInfo = async (req, res) => {
 
 // Get All Restaurant Info information
 const all = async (req, res) => {
-  // Find All with that id
+  // Find All Restaurants
   try {
-    let restaurants = await db.Restaurant.find({}).select('-password -email');
-    res.json({ success: true, count: restaurants.length, results: restaurants });
+    // If There Is A Search. Get Results From That.
+    let results = [];
+    if (req.query.search) {
+      let query = req.query.search.toLowerCase();
+      // First determine if the query matches anything.
+      let results = Trie.findSuffixes(query);
+
+      if (results === -1) throw new Error("No Search Found!");
+
+      let promises = results.map( async result => {
+        if (result.type === 'category') {
+          const category = await db.Category.findOne({ name: result.word });
+          const subResults = await db.Restaurant.find({ category: category._id }).select('-password -email');
+
+          return { isGroup: true, name: category.name, results: subResults };
+        } else if (result.type === 'restaurant') {
+          const re = new RegExp(result.word, "i");
+          const restaurant = await db.Restaurant.findOne({ "name" : { $regex : re } }).select('-password -email');
+
+          return restaurant;
+        }
+      });
+
+      results = await Promise.all(promises);
+      res.json({ success: true, count: results.length, results });
+
+    } else {
+      results = await db.Restaurant.find({}).select('-password -email');
+      res.json({ success: true, count: results.length, results });
+    }
   } catch (error) {
     console.error(error);
     res
@@ -351,7 +384,13 @@ const remove = async (req, res) => {
     if (payload.id !== _id) throw new Error("Forbidden");
 
     // find the restaurant
-    await db.Restaurant.deleteOne({ _id });
+    const restaurant = await db.Restaurant.findOne({ _id });
+
+    // remove from auto complete indexing
+    Trie.deleteWord(restaurant.name);
+
+    await restaurant.delete();
+
     res.status(200).json({
       success: true,
       message: "Restaurant Deleted",

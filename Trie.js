@@ -30,6 +30,19 @@ class Trie {
     currentNode.type = type;
   }
 
+  deleteWord(word) {
+    let currentNode = this.head;
+
+    // add all letters of a word into various hash maps
+    for (let letter of word) {
+      if (currentNode.children.get(letter)) {
+        currentNode = currentNode.children.get(letter);
+      }
+    }
+    // lastly, set the status of the last node as not a word ending.
+    currentNode.isWord = false;
+  }
+
   findSuffixes(prefix) {
     if (!prefix || typeof prefix !== 'string') {
       return -1
@@ -45,14 +58,19 @@ class Trie {
         return -1;
       }
     }
-
+    
     const results = [];
+
+    // We want to return the word even if there's nothing following it.
+    if (currentNode.isWord) {
+      results.push({ word: prefix, type: currentNode.type });
+    }
+
     // by this point we have to recursively search from the prefix to find all suffixes.
     const findRest = (node, chain) => {
       if (node.children.size === 0) {
         return;
       }
-
       node.children.forEach((node, key) => {
         if (node.isWord) {
           results.push({ word: chain + key, type: node.type });
