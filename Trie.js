@@ -44,8 +44,8 @@ class Trie {
   }
 
   findSuffixes(prefix) {
-    if (!prefix || typeof prefix !== 'string') {
-      return -1
+    if (!prefix || typeof prefix !== "string") {
+      return -1;
     }
 
     let currentNode = this.head;
@@ -58,7 +58,7 @@ class Trie {
         return -1;
       }
     }
-    
+
     const results = [];
 
     // We want to return the word even if there's nothing following it.
@@ -77,7 +77,7 @@ class Trie {
         }
         findRest(node, chain + key);
       });
-    }
+    };
     findRest(currentNode, prefix);
     // what's returned is actually the full words found in the trie.
     return results;
