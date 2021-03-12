@@ -2,7 +2,7 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 
 // Better Practice to hid the mongo url
-const { MONGO_URL } = process.env;
+const url = process.env.MONGO_URL || 'mongodb://localhost:27017/munchDev';
 const configOptions = {
   useNewUrlParser: true,
   useCreateIndex: true,
@@ -11,7 +11,7 @@ const configOptions = {
 };
 
 mongoose
-  .connect(MONGO_URL, configOptions)
+  .connect(url, configOptions)
   .then(() => console.log("MongoDB successfully connected..."))
   .catch((err) => console.log("MongoDB connection error:", err));
 
