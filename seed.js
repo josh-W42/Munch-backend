@@ -1,4 +1,6 @@
+const { restaurant } = require("./controllers");
 const db = require("./models");
+const Trie = require('./Trie');
 
 const categories = [
   // multiple categories
@@ -67,7 +69,56 @@ const addOneRestaurant = async () => {
   console.log(savedOneRestaurant)
 };
 
-// >>>>>>>> run the functions <<<<<<<<<<<
-// addManyCategories();
-// addOneCategory();
-// addOneRestaurant();
+// Trie stuff.
+
+const createTrie = () => {
+  let start = new Date();
+  // first store all the categories in the trie
+  const myTrie = new Trie();
+  for (let category of categories) {
+    myTrie.addWord(category.name, 'category');
+  }
+
+  // Now store all restaurants
+  db.Restaurant.find({})
+  .then(restaurants => {
+    restaurants.forEach(restaurant => {
+      myTrie.addWord(restaurant.name.toLowerCase(), 'restaurant');
+    });
+  })
+  .catch(error => {
+    console.error(error);
+  });
+
+  let end = new Date();
+  let timeDifference = new Date(end - start);;
+  
+  console.log(`Added every phrase in ${timeDifference.getMilliseconds()} ms`);
+  return myTrie
+}
+
+const init = async () => {
+
+  // Add categories if none are present in DB.
+  try {
+    const categories = await db.Category.find({});
+    
+    if (categories.length < 1) {
+      addManyCategories();
+    }
+  } catch (error) {
+    console.error(error);
+  }
+  
+  // >>>>>>>> run the functions if needed <<<<<<<<<<<
+  // addOneCategory();
+  // addOneRestaurant();
+}
+
+init();
+
+module.exports = {
+  Trie: createTrie()
+}
+
+

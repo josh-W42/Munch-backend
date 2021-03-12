@@ -6,6 +6,7 @@ const uploads = multer({ dest: "./uploads" });
 
 router.get("/test", ctrl.restaurant.test);
 router.get("/all", ctrl.restaurant.all);
+router.get("/all/:categoryId", ctrl.restaurant.byCategory);
 router.get("/:id/public", ctrl.restaurant.publicInfo);
 router.get(
   "/:id/private",

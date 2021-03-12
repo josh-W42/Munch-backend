@@ -473,7 +473,28 @@ const editMenuItem = async (req, res) => {
       message: "Unable to update the menu item"
     })
   }
-} 
+}
+
+// Find A Restaurant by Category 
+const byCategory = async (req, res) => {
+  const categoryId = req.params.categoryId;
+  try {
+    // find all restaurants with that category id
+    const results = await db.Restaurant.find({ category: categoryId }).select('-password -email');
+
+    res.json({ success: true, results, count: results.length, message: "Sucessfully Searched" });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(400)
+      .json({
+        success: false,
+        results: [],
+        count: 0,
+        message: "Could'nt Get All By That Category",
+      });
+  }
+}
 
 // export all route functions
 module.exports = {
@@ -490,4 +511,5 @@ module.exports = {
   changeCoverImg,
   editMenuItem,
   deleteMenuItem,
+  byCategory,
 };
