@@ -5,7 +5,7 @@ const routes = require("./routes");
 const cors = require("cors");
 const passport = require("passport");
 require("./config/passport")(passport);
-const { Trie } = require('./seed');
+const { Trie } = require("./seed");
 
 // App Set up
 const app = express();
@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 8000;
 
 // Middleware
 app.use(express.urlencoded({ extended: false }));
-app.use(require('morgan')('dev'));
+app.use(require("morgan")("dev"));
 app.use(express.json()); // JSON parsing
 app.use(cors()); // allow all CORS requests
 app.use(passport.initialize());
@@ -32,17 +32,32 @@ app.get("/api/", (req, res) => {
 app.get("/api/find", (req, res) => {
   const query = req.query.search;
   try {
-    if (!query) throw new Error('Empty Search');
-    
+    if (!query) throw new Error("Empty Search");
+
     const results = Trie.findSuffixes(query.toLowerCase());
     if (results === -1) {
-      res.json({ success: true, results: [], count: 0, message: "OK Search, Nothing Found"});
+      res.json({
+        success: true,
+        results: [],
+        count: 0,
+        message: "OK Search, Nothing Found",
+      });
     } else {
-      res.json({ success: true, results, count: results.length, message: "Search OK" });
+      res.json({
+        success: true,
+        results,
+        count: results.length,
+        message: "Search OK",
+      });
     }
   } catch (error) {
     console.error(error);
-    res.json({ success: false, results: [], count: 0, message: "No Results Found!" });
+    res.json({
+      success: false,
+      results: [],
+      count: 0,
+      message: "No Results Found!",
+    });
   }
 });
 
