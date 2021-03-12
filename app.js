@@ -5,6 +5,7 @@ const routes = require("./routes");
 const cors = require("cors");
 const passport = require("passport");
 require("./config/passport")(passport);
+const { Trie } = require('./seed');
 
 // App Set up
 const app = express();
@@ -25,6 +26,24 @@ app.get("/api/", (req, res) => {
     authors: "Andrew Bith, Nelson J Valerio, Joshua Wilson",
     message: "Hello from the Munch Team!",
   });
+});
+
+// Autocomplete Find All
+app.get("/api/find", (req, res) => {
+  const query = req.query.search;
+  try {
+    if (!query) throw new Error('Empty Search');
+    
+    const results = Trie.findSuffixes(query);
+    if (results === -1) {
+      res.json({ success: true, results: [], count: 0, message: "OK Search, Nothing Found"});
+    } else {
+      res.json({ success: true, results, count: results.length, message: "Search OK" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.json({ success: false, results: [], count: 0, message: "No Results Found!" });
+  }
 });
 
 app.use("/api/users", routes.user);
