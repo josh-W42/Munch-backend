@@ -24,8 +24,27 @@ const all = async (req, res) => {
   }
 };
 
+const oneCat = async (req, res) => {
+  const _id = req.params.id
+  try {
+    let category = await db.Category.find({_id});
+    res.json({ success: true, message:"Category found!", results: category });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(400)
+      .json({
+        success: false,
+        message: "Sorry, category doesn't exist.",
+        count: 0,
+        results: [],
+      });
+  }
+};
+
 // export all route functions
 module.exports = {
   test,
   all,
+  oneCat
 };
