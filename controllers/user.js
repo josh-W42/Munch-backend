@@ -37,7 +37,7 @@ const register = async (req, res) => {
       password,
       firstName,
       lastName,
-      profileUrl: "",
+      profileUrl: "https://res.cloudinary.com/dom5vocai/image/upload/v1615610157/profile-image-placeholder_sbz3vl.png",
       coverUrl: "",
       followers: [],
       following: [],
