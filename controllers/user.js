@@ -37,7 +37,7 @@ const register = async (req, res) => {
       password,
       firstName,
       lastName,
-      profileUrl: "",
+      profileUrl: "https://res.cloudinary.com/dom5vocai/image/upload/v1615610157/profile-image-placeholder_sbz3vl.png",
       coverUrl: "",
       followers: [],
       following: [],
@@ -399,16 +399,19 @@ const addFavorite = async (req, res) => {
     // First, get the userId
     const [type, token] = req.headers.authorization.split(' ');
     const payload = jwt.decode(token);
-    const userId = payload.id
+    const userId = payload.id;
 
     const user = await db.User.findOne({ _id: userId });
-
+    
     // Then find the restaurant
     const restaurant = await db.Restaurant.findOne({ _id: restaurantId});
     if (!restaurant) throw new Error('No Restaurant Found');
+    
+    // Check if already favorited
+    if (user.favorites.includes(restaurant._id)) throw new Error("Already Favorited This Restaurant");
 
     // Add a user favorite
-    user.favorites = user.favorites.push(restaurant);
+    user.favorites.push(restaurant);
     await user.save();
 
     res.json({ success: true, message: 'Restaurant Saved To Favorites' });
@@ -436,8 +439,11 @@ const removeFavorite = async (req, res) => {
     const restaurant = await db.Restaurant.findOne({ _id: restaurantId});
     if (!restaurant) throw new Error('No Restaurant Found');
 
+    // Check if already unfavorited
+    if (!user.favorites.includes(restaurant._id)) throw new Error("Restaurant Not Favorited");
+
     // Add a user favorite
-    user.favorites = user.favorites.pull(restaurant);
+    user.favorites.pull(restaurant);
     await user.save();
 
     res.json({ success: true, message: 'Restaurant Removed From Favorites' });
@@ -465,7 +471,7 @@ const follow = async (req, res) => {
     if (!otherUser) throw new Error(`The User You're attempting To Follow Does Not Exist.`);
     
     // Check the follow status
-    if (viewer.following.includes(otherUser.id)) throw new Error(`You're Already Following That User.`);
+    if (viewer.following.includes(otherUser._id)) throw new Error(`You're Already Following That User.`);
     
     // Viewer now follows otherUser
     viewer.following.push(otherUser._id);
@@ -503,7 +509,7 @@ const unFollow = async (req, res) => {
     if (!otherUser) throw new Error(`The User You're attempting To Unfollow Does Not Exist.`);
     
     // Check the follow status
-    if (!viewer.following.includes(otherUser.id)) throw new Error(`You're Not Following That User.`);
+    if (!viewer.following.includes(otherUser._id)) throw new Error(`You're Not Following That User.`);
     
     // Viewer now doesn't follow otherUser
     viewer.following.pull(otherUser._id);
