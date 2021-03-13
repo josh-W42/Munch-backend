@@ -56,10 +56,25 @@ const register = async (req, res) => {
 
         // add the new username to autocomplete index
         Trie.addWord(userName.toLowerCase(), "user");
+        
+        // Then log the user in.
+        const payload = {
+          id: createdUser._id,
+          email: createdUser.email,
+          userName: createdUser.userName,
+          type: "user",
+        };
 
-        res
-          .status(201)
-          .json({ success: true, user: createdUser, message: "User Created" });
+        jwt.sign(payload, JWT_SECRET, { expiresIn: 3600 }, (error, token) => {
+          if (error) throw new Error("Session has ended, please log in again");
+    
+          // This verify method expires in 60 seconds if there is no response after attempting to verify the token
+          const legit = jwt.verify(token, JWT_SECRET, { expiresIn: 60 });
+    
+          res
+            .status(201)
+            .json({ success: true, token: `Bearer ${token}`, data: legit, message: "User Created" });
+        });
       });
     });
   } catch (error) {
@@ -95,7 +110,7 @@ const login = async (req, res) => {
 
     // If the password is valid, then we send off the json web token payload
     const payload = {
-      id: findUser.id,
+      id: findUser._id,
       email: findUser.email,
       userName: findUser.userName,
       type: "user",
