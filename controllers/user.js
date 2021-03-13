@@ -1,10 +1,9 @@
 // imports
 require("dotenv").config();
-const passport = require("passport");
-// For now we'll use bcrypt but ill do a scrypt example too
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = process.env;
+const { Trie } = require('../seed');
 
 // Data base
 const db = require("../models");
@@ -38,8 +37,8 @@ const register = async (req, res) => {
       password,
       firstName,
       lastName,
-      profileImg: "",
-      coverImg: "",
+      profileUrl: "",
+      coverUrl: "",
       followers: [],
       following: [],
       favorites: [],
@@ -54,6 +53,10 @@ const register = async (req, res) => {
 
         newUser.password = hash;
         const createdUser = await newUser.save();
+
+        // add the new username to autocomplete index
+        Trie.addWord(userName.toLowerCase(), "user");
+
         res
           .status(201)
           .json({ success: true, user: createdUser, message: "User Created" });
@@ -104,7 +107,7 @@ const login = async (req, res) => {
       // This verify method expires in 60 seconds if there is no response after attempting to verify the token
       const legit = jwt.verify(token, JWT_SECRET, { expiresIn: 60 });
 
-      res.json({ success: true, token: `Bearer ${token}`, userData: legit });
+      res.json({ success: true, token: `Bearer ${token}`, data: legit });
     });
   } catch (error) {
     console.error(error);
@@ -213,6 +216,12 @@ const edit = async (req, res) => {
       });
     };
 
+    let changedUserName = false;
+    let oldUserName = user.userName;
+    if (user.userName !== userName) {
+      changedUserName = true;
+    }
+
     user.userName = userName;
     user.email = email;
     user.firstName = firstName;
@@ -220,6 +229,13 @@ const edit = async (req, res) => {
 
     // Save the user and the changes.
     await user.save();
+
+    if (changedUserName) {
+      // remove from auto complete indexing
+      Trie.deleteWord(oldUserName.toLowerCase());
+      // add new user name
+      Trie.addWord(user.userName.toLowerCase(), "user");
+    }
 
     res.json({ success: true, message: "User Edit Successful." });
   } catch (error) {
@@ -260,7 +276,7 @@ const changeProfileImg = async (req, res) => {
 
     // First see if you can process the image.
     // Check if user inputed an image.
-    let profileUrl = user.profileImg;
+    let profileUrl = user.profile;
     if (req.file) {
       let image = req.file.path;
       try {
@@ -271,7 +287,7 @@ const changeProfileImg = async (req, res) => {
       }
     }
 
-    user.profileImg = profileUrl;
+    user.profileUrl = profileUrl;
     await user.save();
     res.json({ success: true, message: "Profile Picture Successfuly Changed" });
   } catch (error) {
@@ -305,7 +321,7 @@ const changeCoverImg = async (req, res) => {
 
     // First see if you can process the image.
     // Check if user inputed an image.
-    let coverUrl = user.coverImg;
+    let coverUrl = user.coverUrl;
     if (req.file) {
       let image = req.file.path;
       try {
@@ -316,7 +332,7 @@ const changeCoverImg = async (req, res) => {
       }
     }
 
-    user.coverImg = coverUrl;
+    user.coverUrl = coverUrl;
     await user.save();
     res.json({ success: true, message: "Cover Picture Successfuly Changed" });
   } catch (error) {
@@ -346,11 +362,20 @@ const remove = async (req, res) => {
     // check if user is deleting only themselves
     if (payload.id !== _id) throw new Error("Forbidden");
 
-    await db.User.deleteOne({ _id });
+    const user = await db.User.findOne({ _id });
+    
+    // remove from auto complete indexing
+    Trie.deleteWord(user.userName.toLowerCase());
+
+    // then delete from db
+    await user.delete();
+
     res.status(200).json({
       success: true,
       message: "User Deleted",
     });
+
+
   } catch (error) {
     console.error(error);
     if (error.message === "Forbidden") {
@@ -383,7 +408,7 @@ const addFavorite = async (req, res) => {
     if (!restaurant) throw new Error('No Restaurant Found');
 
     // Add a user favorite
-    user.favorites = user.favorites.concat([restaurant]);
+    user.favorites = user.favorites.push(restaurant);
     await user.save();
 
     res.json({ success: true, message: 'Restaurant Saved To Favorites' });
@@ -395,6 +420,35 @@ const addFavorite = async (req, res) => {
       message: error.message
     });
   }
+}
+
+const removeFavorite = async (req, res) => {
+  const restaurantId = req.params.restaurantId;
+  try {
+    // First, get the userId
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+    const userId = payload.id
+
+    const user = await db.User.findOne({ _id: userId });
+
+    // Then find the restaurant
+    const restaurant = await db.Restaurant.findOne({ _id: restaurantId});
+    if (!restaurant) throw new Error('No Restaurant Found');
+
+    // Add a user favorite
+    user.favorites = user.favorites.pull(restaurant);
+    await user.save();
+
+    res.json({ success: true, message: 'Restaurant Removed From Favorites' });
+
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }  
 }
 
 // Route To Follow Someone Else
@@ -435,6 +489,43 @@ const follow = async (req, res) => {
   }
 }
 
+// Route To unfollow Someone Else
+const unFollow = async (req, res) => {
+  const otherId = req.params.otherId;
+  try {
+    // find "viewing" user
+    const [type, token] = req.headers.authorization.split(' ');
+    const payload = jwt.decode(token);
+    const viewer = await db.User.findOne({ _id: payload.id });
+    
+    // find the "other" user
+    const otherUser = await db.User.findOne({ _id: otherId });
+    if (!otherUser) throw new Error(`The User You're attempting To Unfollow Does Not Exist.`);
+    
+    // Check the follow status
+    if (!viewer.following.includes(otherUser.id)) throw new Error(`You're Not Following That User.`);
+    
+    // Viewer now doesn't follow otherUser
+    viewer.following.pull(otherUser._id);
+    await viewer.save();
+
+    // OtherUser now doesn't have a follower
+    otherUser.followers.pull(viewer._id);
+    await otherUser.save();
+
+    res.json({
+      success: true,
+      message: "Successfully Unfollowed User"
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}
+
 // export all route functions
 module.exports = {
   test,
@@ -446,7 +537,9 @@ module.exports = {
   edit,
   remove,
   addFavorite,
+  removeFavorite,
   changeProfileImg,
   changeCoverImg,
   follow,
+  unFollow,
 };

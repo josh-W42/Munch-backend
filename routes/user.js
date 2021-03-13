@@ -12,8 +12,10 @@ router.get(
   passport.authenticate("jwt", { session: false }),
   ctrl.user.privateInfo
 );
+
 router.post("/register", ctrl.user.register);
 router.post("/login", ctrl.user.login);
+
 router.put(
   "/:id/edit",
   passport.authenticate("jwt", { session: false }),
@@ -37,10 +39,21 @@ router.put(
   ctrl.user.addFavorite
 );
 router.put(
+  "/removeFavorite/:restaurantId",
+  passport.authenticate("jwt", { session: false }),
+  ctrl.user.removeFavorite
+);
+router.put(
   "/follow/:otherId",
   passport.authenticate("jwt", { session: false }),
   ctrl.user.follow
 );
+router.put(
+  "/unfollow/:otherId",
+  passport.authenticate("jwt", { session: false }),
+  ctrl.user.unFollow
+);
+
 router.delete(
   "/:id/delete",
   passport.authenticate("jwt", { session: false }),

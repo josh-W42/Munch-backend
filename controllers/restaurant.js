@@ -1,9 +1,9 @@
 // imports
 require("dotenv").config();
-const passport = require("passport");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = process.env;
+const { Trie } = require('../seed');
 
 // Data base
 const db = require("../models");
@@ -32,8 +32,8 @@ const register = async (req, res) => {
       name,
       email,
       password,
-      profileImg: "",
-      coverImg: "",
+      profileUrl: "",
+      coverUrl: "",
       menu: [],
       category: [foundCategory],
     });
@@ -47,6 +47,10 @@ const register = async (req, res) => {
 
         newRestaurant.password = hash;
         const createdRestaurant = await newRestaurant.save();
+
+        // add the new username to autocomplete index
+        Trie.addWord(name.toLowerCase(), "restaurant");
+
         res
           .status(201)
           .json({
@@ -101,7 +105,7 @@ const login = async (req, res) => {
       // This verify method expires in 60 seconds if there is no response after attempting to verify the token
       const legit = jwt.verify(token, JWT_SECRET, { expiresIn: 60 });
 
-      res.json({ success: true, token: `Bearer ${token}`, RestaurantData: legit });
+      res.json({ success: true, token: `Bearer ${token}`, data: legit });
     });
   } catch (error) {
     console.error(error);
@@ -114,7 +118,7 @@ const publicInfo = async (req, res) => {
   const _id = req.params.id;
   // Find a user with that id
   try {
-    const restaurant = await db.Restaurant.findOne({ _id }).select('-password -email -coverImg');
+    const restaurant = await db.Restaurant.findOne({ _id }).select('-password -email');
     // If it doesn't exist, throw an error
     if (!restaurant) throw new Error("Restaurant Does Not Exist.");
 
@@ -160,10 +164,38 @@ const privateInfo = async (req, res) => {
 
 // Get All Restaurant Info information
 const all = async (req, res) => {
-  // Find All with that id
+  // Find All Restaurants
   try {
-    let restaurants = await db.Restaurant.find({}).select('-password -email -coverImg');
-    res.json({ success: true, count: restaurants.length, results: restaurants });
+    // If There Is A Search. Get Results From That.
+    let results = [];
+    if (req.query.search) {
+      let query = req.query.search.toLowerCase();
+      // First determine if the query matches anything.
+      let results = Trie.findSuffixes(query);
+
+      if (results === -1) throw new Error("No Search Found!");
+
+      let promises = results.map( async result => {
+        if (result.type === 'category') {
+          const category = await db.Category.findOne({ name: result.word });
+          const subResults = await db.Restaurant.find({ category: category._id }).select('-password -email');
+
+          return { isGroup: true, name: category.name, results: subResults };
+        } else if (result.type === 'restaurant') {
+          const re = new RegExp(result.word, "i");
+          const restaurant = await db.Restaurant.findOne({ "name" : { $regex : re } }).select('-password -email');
+
+          return restaurant;
+        }
+      });
+
+      results = await Promise.all(promises);
+      res.json({ success: true, count: results.length, results });
+
+    } else {
+      results = await db.Restaurant.find({}).select('-password -email');
+      res.json({ success: true, count: results.length, results });
+    }
   } catch (error) {
     console.error(error);
     res
@@ -221,12 +253,25 @@ const edit = async (req, res) => {
     const foundCategory = await db.Category.findOne({ name: category });
     if (!foundCategory) throw new Error("Category Does Not Exist");
 
+    let changedName = false;
+    let oldName = restaurant.name;
+    if (restaurant.name !== name) {
+      changedName = true;
+    }
+
     restaurant.name = name;
     restaurant.email = email;
     restaurant.category = [foundCategory];
 
     // Save the restaurant and the changes.
     await restaurant.save();
+
+    if (changedUserName) {
+      // remove from auto complete indexing
+      Trie.deleteWord(oldName.toLowerCase());
+      // add new user name
+      Trie.addWord(restaurant.name.toLowerCase(), "restaurant");
+    }
 
     res.json({ success: true, message: "Restaurant Edit Successful." });
   } catch (error) {
@@ -267,7 +312,7 @@ const changeProfileImg = async (req, res) => {
 
     // First see if you can process the image.
     // Check if restaurant inputed an image.
-    let profileUrl = restaurant.profileImg;
+    let profileUrl = restaurant.profileUrl;
     if (req.file) {
       let image = req.file.path;
       try {
@@ -278,7 +323,7 @@ const changeProfileImg = async (req, res) => {
       }
     }
 
-    restaurant.profileImg = profileUrl;
+    restaurant.profileUrl = profileUrl;
     await restaurant.save();
     res.json({ success: true, message: "Profile Picture Successfuly Changed" });
   } catch (error) {
@@ -312,7 +357,7 @@ const changeCoverImg = async (req, res) => {
 
     // First see if you can process the image.
     // Check if restaurant inputed an image.
-    let coverUrl = restaurant.coverImg;
+    let coverUrl = restaurant.coverUrl;
     if (req.file) {
       let image = req.file.path;
       try {
@@ -323,7 +368,7 @@ const changeCoverImg = async (req, res) => {
       }
     }
 
-    restaurant.coverImg = coverUrl;
+    restaurant.coverUrl = coverUrl;
     await restaurant.save();
     res.json({ success: true, message: "Cover Picture Successfuly Changed" });
   } catch (error) {
@@ -352,7 +397,13 @@ const remove = async (req, res) => {
     if (payload.id !== _id) throw new Error("Forbidden");
 
     // find the restaurant
-    await db.Restaurant.deleteOne({ _id });
+    const restaurant = await db.Restaurant.findOne({ _id });
+
+    // remove from auto complete indexing
+    Trie.deleteWord(restaurant.name.toLowerCase());
+
+    await restaurant.delete();
+
     res.status(200).json({
       success: true,
       message: "Restaurant Deleted",
@@ -474,7 +525,28 @@ const editMenuItem = async (req, res) => {
       message: "Unable to update the menu item"
     })
   }
-} 
+}
+
+// Find A Restaurant by Category 
+const byCategory = async (req, res) => {
+  const categoryId = req.params.categoryId;
+  try {
+    // find all restaurants with that category id
+    const results = await db.Restaurant.find({ category: categoryId }).select('-password -email');
+
+    res.json({ success: true, results, count: results.length, message: "Sucessfully Searched" });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(400)
+      .json({
+        success: false,
+        results: [],
+        count: 0,
+        message: "Could'nt Get All By That Category",
+      });
+  }
+}
 
 // export all route functions
 module.exports = {
@@ -491,5 +563,5 @@ module.exports = {
   changeCoverImg,
   editMenuItem,
   deleteMenuItem,
-
+  byCategory,
 };

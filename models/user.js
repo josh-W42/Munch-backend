@@ -25,10 +25,10 @@ const userSchema = new mongoose.Schema(
       minLength: 8,
       required: true,
     },
-    profileImg: {
+    profileUrl: {
       type: String,
     },
-    coverImg: {
+    coverUrl: {
       type: String,
     },
     favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: "Restaurant" }],

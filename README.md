@@ -30,3 +30,7 @@ Connecting #foodies together, Plaid by Munch is designed to create one large pic
 - [ ] Achieve MVP 
 - [ ] Geo Location API
 - [ ] Payment Method API 
+
+
+## Credits
+- Category Icons made by [Freepik](https://www.freepik.com) from [www.flaticon.com](https://www.flaticon.com/).

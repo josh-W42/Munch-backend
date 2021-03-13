@@ -3,7 +3,11 @@ const mongoose = require("mongoose");
 // products: array of mongoId's, with ref 'Product'
 const categorySchema = new mongoose.Schema(
   {
-    name: String,
+    name: {
+      type: String,
+      unique: true,
+    },
+    picture: String,
   },
   { timestamps: true }
 );
