@@ -253,12 +253,25 @@ const edit = async (req, res) => {
     const foundCategory = await db.Category.findOne({ name: category });
     if (!foundCategory) throw new Error("Category Does Not Exist");
 
+    let changedName = false;
+    let oldName = restaurant.name;
+    if (restaurant.name !== name) {
+      changedName = true;
+    }
+
     restaurant.name = name;
     restaurant.email = email;
     restaurant.category = [foundCategory];
 
     // Save the restaurant and the changes.
     await restaurant.save();
+
+    if (changedUserName) {
+      // remove from auto complete indexing
+      Trie.deleteWord(oldName.toLowerCase());
+      // add new user name
+      Trie.addWord(restaurant.name.toLowerCase(), "restaurant");
+    }
 
     res.json({ success: true, message: "Restaurant Edit Successful." });
   } catch (error) {
@@ -387,7 +400,7 @@ const remove = async (req, res) => {
     const restaurant = await db.Restaurant.findOne({ _id });
 
     // remove from auto complete indexing
-    Trie.deleteWord(restaurant.name);
+    Trie.deleteWord(restaurant.name.toLowerCase());
 
     await restaurant.delete();
 

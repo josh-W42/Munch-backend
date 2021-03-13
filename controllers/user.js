@@ -216,6 +216,12 @@ const edit = async (req, res) => {
       });
     };
 
+    let changedUserName = false;
+    let oldUserName = user.userName;
+    if (user.userName !== userName) {
+      changedUserName = true;
+    }
+
     user.userName = userName;
     user.email = email;
     user.firstName = firstName;
@@ -223,6 +229,13 @@ const edit = async (req, res) => {
 
     // Save the user and the changes.
     await user.save();
+
+    if (changedUserName) {
+      // remove from auto complete indexing
+      Trie.deleteWord(oldUserName.toLowerCase());
+      // add new user name
+      Trie.addWord(user.userName.toLowerCase(), "user");
+    }
 
     res.json({ success: true, message: "User Edit Successful." });
   } catch (error) {
@@ -352,7 +365,7 @@ const remove = async (req, res) => {
     const user = await db.User.findOne({ _id });
     
     // remove from auto complete indexing
-    Trie.deleteWord(user.userName);
+    Trie.deleteWord(user.userName.toLowerCase());
 
     // then delete from db
     await user.delete();
