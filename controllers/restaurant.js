@@ -18,7 +18,7 @@ const test = async (req, res) => {
 
 // Controller for Registering a new Restaurant.
 const register = async (req, res) => {
-  const { name, email, password, category } = req.body;
+  const { name, email, password, category, profileUrl } = req.body;
 
   // Ok so this is when do things like check if an email or name already exists
   try {
@@ -31,7 +31,7 @@ const register = async (req, res) => {
       name,
       email,
       password,
-      profileUrl: "",
+      profileUrl: profileUrl || "",
       coverUrl: "",
       menu: [],
       category: [foundCategory],
@@ -265,8 +265,8 @@ const edit = async (req, res) => {
     }
 
     // Find the category
-    const foundCategory = await db.Category.findOne({ name: category });
-    if (!foundCategory) throw new Error("Category Does Not Exist");
+    const foundCategory = await db.Category.findOne({ name: category});
+    if (!foundCategory && category.length > 16) throw new Error("Category Does Not Exist");
 
     let changedName = false;
     let oldName = restaurant.name;
@@ -281,7 +281,7 @@ const edit = async (req, res) => {
     // Save the restaurant and the changes.
     await restaurant.save();
 
-    if (changedUserName) {
+    if (changedName) {
       // remove from auto complete indexing
       Trie.deleteWord(oldName.toLowerCase());
       // add new user name
