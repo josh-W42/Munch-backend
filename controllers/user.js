@@ -29,7 +29,6 @@ const register = async (req, res) => {
 
   // check if an email or username already exists
   try {
-
     // Create a new user.
     const newUser = await db.User.create({
       userName,
@@ -37,7 +36,8 @@ const register = async (req, res) => {
       password,
       firstName,
       lastName,
-      profileUrl: "https://res.cloudinary.com/dom5vocai/image/upload/v1615610157/profile-image-placeholder_sbz3vl.png",
+      profileUrl:
+        "https://res.cloudinary.com/dom5vocai/image/upload/v1615610157/profile-image-placeholder_sbz3vl.png",
       coverUrl: "",
       followers: [],
       following: [],
@@ -56,7 +56,7 @@ const register = async (req, res) => {
 
         // add the new username to autocomplete index
         Trie.addWord(userName.toLowerCase(), "user");
-        
+
         // Then log the user in.
         const payload = {
           id: createdUser._id,
@@ -67,29 +67,34 @@ const register = async (req, res) => {
 
         jwt.sign(payload, JWT_SECRET, { expiresIn: 3600 }, (error, token) => {
           if (error) throw new Error("Session has ended, please log in again");
-    
+
           // This verify method expires in 60 seconds if there is no response after attempting to verify the token
           const legit = jwt.verify(token, JWT_SECRET, { expiresIn: 60 });
-    
+
           res
             .status(201)
-            .json({ success: true, token: `Bearer ${token}`, data: legit, message: "User Created" });
+            .json({
+              success: true,
+              token: `Bearer ${token}`,
+              data: legit,
+              message: "User Created",
+            });
         });
       });
     });
   } catch (error) {
     console.error(error);
-    if (error.name === 'MongoError') {
+    if (error.name === "MongoError") {
       const needToChange = error.keyPattern;
       res.status(409).json({
         success: false,
         message: "Database Error",
-        needToChange
+        needToChange,
       });
     } else {
       res.status(400).json({
         success: false,
-        message: error.message
+        message: error.message,
       });
     }
   }

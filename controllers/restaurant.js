@@ -22,7 +22,6 @@ const register = async (req, res) => {
 
   // Ok so this is when do things like check if an email or name already exists
   try {
-
     // Find the category
     const foundCategory = await db.Category.findOne({ name: category });
     if (!foundCategory) throw new Error("Category Does Not Exist");
@@ -61,13 +60,18 @@ const register = async (req, res) => {
 
         jwt.sign(payload, JWT_SECRET, { expiresIn: 3600 }, (error, token) => {
           if (error) throw new Error("Session has ended, please log in again");
-    
+
           // This verify method expires in 60 seconds if there is no response after attempting to verify the token
           const legit = jwt.verify(token, JWT_SECRET, { expiresIn: 60 });
-    
+
           res
             .status(201)
-            .json({ success: true, token: `Bearer ${token}`, data: legit, message: "Restaurant Created" });
+            .json({
+              success: true,
+              token: `Bearer ${token}`,
+              data: legit,
+              message: "Restaurant Created",
+            });
         });
       });
     });
