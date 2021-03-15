@@ -51,13 +51,24 @@ const register = async (req, res) => {
         // add the new username to autocomplete index
         Trie.addWord(name.toLowerCase(), "restaurant");
 
-        res
-          .status(201)
-          .json({
-            success: true,
-            restaurant: createdRestaurant,
-            message: "Restaurant Created",
-          });
+        // Then log the restaurant in.
+        const payload = {
+          id: createdRestaurant._id,
+          email: createdRestaurant.email,
+          name: createdRestaurant.name,
+          type: "restaurant",
+        };
+
+        jwt.sign(payload, JWT_SECRET, { expiresIn: 3600 }, (error, token) => {
+          if (error) throw new Error("Session has ended, please log in again");
+    
+          // This verify method expires in 60 seconds if there is no response after attempting to verify the token
+          const legit = jwt.verify(token, JWT_SECRET, { expiresIn: 60 });
+    
+          res
+            .status(201)
+            .json({ success: true, token: `Bearer ${token}`, data: legit, message: "Restaurant Created" });
+        });
       });
     });
   } catch (error) {
@@ -93,7 +104,7 @@ const login = async (req, res) => {
 
     // If the password is valid, then we send off the json web token payload
     const payload = {
-      id: findRestaurant.id,
+      id: findRestaurant._id,
       email: findRestaurant.email,
       name: findRestaurant.name,
       type: "restaurant",
