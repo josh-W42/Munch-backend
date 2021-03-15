@@ -264,7 +264,7 @@ const addOneRestaurant = async () => {
 };
 const addNelsons = async () => {
   try {
-    const savedOneRestaurant = await db.Restaurant.create(oneRestaurant);
+    const savedOneRestaurant = await db.Restaurant.create(nelsonTipico);
     const mexican = await db.Category.findOne({name: "mexican"});
     savedOneRestaurant.category = mexican;
     savedOneRestaurant.save();
@@ -276,7 +276,7 @@ const addNelsons = async () => {
 };
 const addJoshs = async () => {
   try {
-    const savedOneRestaurant = await db.Restaurant.create(oneRestaurant);
+    const savedOneRestaurant = await db.Restaurant.create(joshBobBurger);
     const lunch = await db.Category.findOne({name: "lunch"});
     savedOneRestaurant.category = lunch;
     savedOneRestaurant.save();
@@ -288,7 +288,7 @@ const addJoshs = async () => {
 };
 const addAndrews = async () => {
   try {
-    const savedOneRestaurant = await db.Restaurant.create(oneRestaurant);
+    const savedOneRestaurant = await db.Restaurant.create(andrewCityWok);
     const chinese = await db.Category.findOne({name: "chinese"});
     savedOneRestaurant.category = chinese;
     savedOneRestaurant.save();
@@ -300,7 +300,7 @@ const addAndrews = async () => {
 };
 const addJames = async () => {
   try {
-    const savedOneRestaurant = await db.Restaurant.create(oneRestaurant);
+    const savedOneRestaurant = await db.Restaurant.create(jamesSurfandTurn);
     const dinner = await db.Category.findOne({name: "dinner"});
     savedOneRestaurant.category = dinner;
     savedOneRestaurant.save();
@@ -312,7 +312,7 @@ const addJames = async () => {
 };
 const addRome = async () => {
   try {
-    const savedOneRestaurant = await db.Restaurant.create(oneRestaurant);
+    const savedOneRestaurant = await db.Restaurant.create(romeItalian);
     const italian = await db.Category.findOne({name: "italian"});
     savedOneRestaurant.category = italian;
     savedOneRestaurant.save();
@@ -324,7 +324,7 @@ const addRome = async () => {
 };
 const addBrian = async () => {
   try {
-    const savedOneRestaurant = await db.Restaurant.create(oneRestaurant);
+    const savedOneRestaurant = await db.Restaurant.create(briansCrabShack);
     const lunch = await db.Category.findOne({name: "lunch"});
     savedOneRestaurant.category = lunch;
     savedOneRestaurant.save();
@@ -336,7 +336,7 @@ const addBrian = async () => {
 };
 const addNick = async () => {
   try {
-    const savedOneRestaurant = await db.Restaurant.create(oneRestaurant);
+    const savedOneRestaurant = await db.Restaurant.create(nicksIceCream);
     const vegan = await db.Category.findOne({name: "vegan"});
     savedOneRestaurant.category = vegan;
     savedOneRestaurant.save();
