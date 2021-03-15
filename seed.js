@@ -392,18 +392,17 @@ const createTrie = () => {
   return myTrie
 }
 
-const init = async () => {
+const init = () => {
 
   // Add categories if none are present in DB.
-  try {
-    const categories = await db.Category.find({});
-    
+  db.Category.find({}).then( categories => {
     if (categories.length < 1) {
       addManyCategories();
     }
-  } catch (error) {
+  }).catch(error => {
     console.error(error);
-  }
+    // Don't Worry About it.
+  });
   
   // >>>>>>>> run the functions if needed <<<<<<<<<<<
   try {
