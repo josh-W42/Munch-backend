@@ -22,6 +22,7 @@ Connecting #foodies together, Plaid by Munch is designed to create one large pic
 - [ ] Connec with users and receive foodback on our food
 
 ## PostMan API Documentation
+[Link Here!](https://documenter.getpostman.com/view/14742524/Tz5qbxeC)
 
 ## Wireframes 
 ![Wireframe1](wireframes/wireframe1.png)
